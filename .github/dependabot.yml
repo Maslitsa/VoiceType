@@ -1,18 +1,15 @@
 version: 2
 updates:
-  # Python dependencies. Monthly, because this is an application people install
-  # once -- a weekly churn of pull requests would just be noise.
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 5
-    groups:
-      python-dependencies:
-        patterns: ["*"]
-
-  # The workflow actions themselves, which is how the Node 20 deprecation got
-  # noticed the first time.
+  # GitHub Actions only, on purpose.
+  #
+  # Dependabot was pointed at pip first and immediately proposed rewriting
+  # numpy>=1.26 to numpy>=2.4.6. Those are lower bounds, not pins: they record
+  # the oldest version VoiceType is known to work with, so raising them to
+  # whatever is newest drops support for working setups and tests nothing.
+  # requirements.txt is reviewed by hand instead.
+  #
+  # Action versions are a different matter -- they go stale silently, which is
+  # how the Node 20 deprecation warning first appeared here.
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
