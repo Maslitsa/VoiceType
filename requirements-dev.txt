@@ -2,4 +2,4 @@
 -r requirements.txt
 
 # tools/check_cloud.py resamples the Windows SAPI voices it synthesises.
-scipy>=1.11
+scipy>=1.17.1

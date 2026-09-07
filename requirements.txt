@@ -11,7 +11,7 @@ RealtimeSTT>=1.1.2
 
 # Pulled in by RealtimeSTT, listed because VoiceType imports them directly and
 # should not silently depend on another package's requirements.
-numpy>=1.26
+numpy>=2.4.6
 PyAudio>=0.2.14
 webrtcvad-wheels>=2.0.14
 
@@ -20,7 +20,7 @@ keyboard>=0.13.5
 
 # Tray icon and its generated bitmap.
 pystray>=0.19.5
-pillow>=10.0
+pillow>=12.3.0
 
 # OpenAI speech-to-text and the optional cleanup pass.
-httpx>=0.27
+httpx>=0.28.1
