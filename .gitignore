@@ -1,0 +1,58 @@
+# ---------------------------------------------------------------------------
+# Secrets. Nothing here should ever reach a commit.
+#
+# VoiceType keeps the OpenAI key in %APPDATA%\VoiceType\openai.key, outside
+# the project, precisely so it cannot be committed by accident. These rules
+# are the second line of defence for anyone who puts one here anyway.
+# ---------------------------------------------------------------------------
+*.key
+*.pem
+.env
+.env.*
+secrets.json
+openai.key
+
+# Local settings. Written on first run from the defaults in
+# voicetype/config.py, and it has an api_key field, so it stays untracked.
+config.json
+
+# ---------------------------------------------------------------------------
+# Local state
+# ---------------------------------------------------------------------------
+logs/
+*.log
+
+# Upstream RealtimeSTT clone, if you keep one here for reference.
+# VoiceType installs it from PyPI; this is not part of the project.
+RealtimeSTT-repo/
+
+# Notes and drafts that are not part of the published project.
+REDDIT.md
+WORKLOG.md
+NOTES.md
+scratch/
+
+# ---------------------------------------------------------------------------
+# Python
+# ---------------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# ---------------------------------------------------------------------------
+# Editors and OS
+# ---------------------------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+Thumbs.db
+desktop.ini

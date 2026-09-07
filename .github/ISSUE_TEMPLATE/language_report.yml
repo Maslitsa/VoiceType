@@ -1,0 +1,60 @@
+name: Language / accuracy report
+description: Recognition is wrong for your language or language pair
+labels: ["accuracy", "language"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        These are the most useful reports this project can get. Everything is
+        tuned against English, Russian and German on one laptop microphone, so
+        results from other setups are genuinely new information.
+
+  - type: input
+    id: languages
+    attributes:
+      label: Language(s)
+      placeholder: "Spanish, or Spanish -> English mid-sentence"
+    validations:
+      required: true
+
+  - type: textarea
+    id: said
+    attributes:
+      label: What you said
+    validations:
+      required: true
+
+  - type: textarea
+    id: got
+    attributes:
+      label: What came out
+    validations:
+      required: true
+
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend
+      options:
+        - Local (Whisper on CPU)
+        - Local (Whisper on GPU)
+        - OpenAI
+    validations:
+      required: true
+
+  - type: input
+    id: model
+    attributes:
+      label: Model
+      description: "`model.final` from config.json, or the cloud model."
+      placeholder: "base"
+
+  - type: textarea
+    id: mic
+    attributes:
+      label: Output of tools/check_mic.py
+      description: |
+        Run `.venv\Scripts\python.exe tools\check_mic.py` while speaking.
+        A quiet microphone degrades some languages long before others, so
+        this rules out the most common cause.
+      render: text

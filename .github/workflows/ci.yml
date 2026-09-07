@@ -1,0 +1,61 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Python ${{ matrix.python }} on Windows
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # The versions RealtimeSTT supports: python_requires >=3.11,<3.13.
+        python: ["3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+
+      - name: Compile every source file
+        run: python -m compileall -q voicetype run.py tools
+
+      - name: Fail on syntax warnings
+        # Escaped backslashes in Windows paths inside docstrings are an easy
+        # mistake to make in this codebase, and they only warn.
+        run: python -W error::SyntaxWarning -m compileall -q -f voicetype run.py tools
+
+      - name: Import the modules that need no audio hardware
+        run: |
+          python -c "import sys; sys.path.insert(0, '.'); from voicetype import config; c = config.DEFAULTS; assert c['recording']['vad_aggressiveness'] == 1; print('config OK')"
+          python -c "import sys; sys.path.insert(0, '.'); from voicetype import winjob; print('winjob installs:', winjob.join_kill_on_close())"
+
+      - name: Check the installer parses
+        shell: pwsh
+        run: |
+          $errors = $null
+          $null = [System.Management.Automation.Language.Parser]::ParseFile(
+            (Resolve-Path .\install.ps1), [ref]$null, [ref]$errors)
+          if ($errors) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }
+          Write-Host "install.ps1 parses cleanly"
+
+  secrets:
+    name: No committed secrets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Scan for API keys
+        run: |
+          if grep -rniE "sk-(proj-)?[A-Za-z0-9_-]{20,}" \
+               --include="*.py" --include="*.json" --include="*.md" \
+               --include="*.ps1" --include="*.yml" --include="*.txt" .; then
+            echo "::error::Something that looks like an API key is committed."
+            exit 1
+          fi
+          echo "No API keys found."

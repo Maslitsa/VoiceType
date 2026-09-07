@@ -1,0 +1,26 @@
+# VoiceType runtime dependencies.
+#
+# Lower bounds, not exact pins: this is an application people install once,
+# and pinning would strand them on old wheels. The versions named here are the
+# ones it is developed and tested against.
+
+# Microphone pipeline, voice activity detection and the live preview.
+# 1.1.0 is the first release with the external-audio API (use_microphone=False
+# plus feed_audio) that VoiceType drives by hand.
+RealtimeSTT>=1.1.2
+
+# Pulled in by RealtimeSTT, listed because VoiceType imports them directly and
+# should not silently depend on another package's requirements.
+numpy>=1.26
+PyAudio>=0.2.14
+webrtcvad-wheels>=2.0.14
+
+# Low-level keyboard hook for the Ctrl+Alt chord.
+keyboard>=0.13.5
+
+# Tray icon and its generated bitmap.
+pystray>=0.19.5
+pillow>=10.0
+
+# OpenAI speech-to-text and the optional cleanup pass.
+httpx>=0.27

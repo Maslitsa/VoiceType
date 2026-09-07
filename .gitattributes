@@ -1,0 +1,7 @@
+# Normalise line endings so the repo is not full of CRLF/LF churn.
+* text=auto eol=lf
+
+# PowerShell is happier with CRLF on Windows.
+*.ps1 text eol=crlf
+
+*.png binary

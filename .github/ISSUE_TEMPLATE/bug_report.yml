@@ -1,0 +1,57 @@
+name: Bug report
+description: Something does not work
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: [docs/troubleshooting.md](https://github.com/Maslitsa/VoiceType/blob/main/docs/troubleshooting.md)
+        covers the common ones — "Nothing heard", the hotkey going dead, and
+        the wrong Python version.
+
+        **Never paste an API key**, including inside a log excerpt.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, what you got instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: log
+    attributes:
+      label: Log
+      description: The relevant part of `logs\voicetype.log`. Redact any key.
+      render: text
+
+  - type: dropdown
+    id: backend
+    attributes:
+      label: Backend
+      options:
+        - Local (Whisper on CPU)
+        - Local (Whisper on GPU)
+        - OpenAI
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: versions
+    attributes:
+      label: Windows and Python version
+      placeholder: "Windows 11 23H2, Python 3.12.7"
+    validations:
+      required: true
+
+  - type: textarea
+    id: mic
+    attributes:
+      label: Microphone check
+      description: |
+        If this is about recognition quality or "Nothing heard", please run
+        `.venv\Scripts\python.exe tools\check_mic.py` while speaking, and
+        paste the output. It is far more useful than a description.
+      render: text

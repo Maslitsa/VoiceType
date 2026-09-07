@@ -1,0 +1,5 @@
+# Extras used only by the scripts in tools/, never by the app itself.
+-r requirements.txt
+
+# tools/check_cloud.py resamples the Windows SAPI voices it synthesises.
+scipy>=1.11

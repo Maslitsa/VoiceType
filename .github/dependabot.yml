@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # Python dependencies. Monthly, because this is an application people install
+  # once -- a weekly churn of pull requests would just be noise.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      python-dependencies:
+        patterns: ["*"]
+
+  # The workflow actions themselves, which is how the Node 20 deprecation got
+  # noticed the first time.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
