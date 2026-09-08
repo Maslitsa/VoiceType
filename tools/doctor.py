@@ -145,8 +145,11 @@ def check_running():
         kernel32.CloseHandle(ctypes.c_void_p(handle))
         say(OK, "Running", "yes")
     else:
-        say(WARN, "Running", "not running",
-            "Start it from the Start Menu, or run INSTALL.bat.")
+        # The instance mutex is claimed a moment after launch, so running this
+        # immediately after starting VoiceType can catch the gap.
+        say(WARN, "Running", "not running (or still starting)",
+            "If you just started it, wait a few seconds and run this again. "
+            "Otherwise start it from the Start Menu.")
 
 
 def check_autostart():
