@@ -85,24 +85,47 @@ Both languages, both scripts, one pass.
 
 ## Install
 
-You need **Windows 10 or 11** and **Python 3.11 or 3.12**
-([not 3.13](#requirements) — the installer checks and tells you).
+One command in PowerShell:
 
-### The easy way
+```powershell
+irm https://raw.githubusercontent.com/Maslitsa/VoiceType/main/install.ps1 | iex
+```
 
-1. [**Download the project as a ZIP**](https://github.com/Maslitsa/VoiceType/archive/refs/heads/main.zip)
-   and unzip it somewhere permanent, like `Documents\VoiceType`.
-2. Double-click **`INSTALL.bat`**.
-3. Wait. The first run downloads a few hundred MB of PyTorch and Whisper
-   weights, so give it a few minutes.
+That downloads the project to `%LOCALAPPDATA%\Programs\VoiceType`, builds its
+own virtual environment, installs everything, registers VoiceType to start when
+you sign in, and launches it. The first run pulls a few hundred MB of PyTorch
+and Whisper weights, so give it a few minutes.
 
-That is it. Hold `Ctrl`+`Alt` and talk.
+Then hold `Ctrl`+`Alt` and talk.
 
-> Windows may show "Windows protected your PC" because the file is not signed.
-> Click **More info → Run anyway**. You can read `INSTALL.bat` first — it is
-> six lines, and all it does is run `install.ps1` for you.
+Needs **Windows 10 or 11** and **Python 3.11 or 3.12** — [not
+3.13](#requirements), and the installer checks before it does anything.
 
-### The git way
+Run the same command again any time to update: it pulls the latest version and
+keeps your `config.json`.
+
+<details>
+<summary><b>Passing options, or installing somewhere else</b></summary>
+
+<br>
+
+A piped script cannot take arguments directly, so build it into a script block:
+
+```powershell
+$s = [scriptblock]::Create((irm https://raw.githubusercontent.com/Maslitsa/VoiceType/main/install.ps1))
+& $s -InstallDir 'D:\Apps\VoiceType'
+& $s -NoAutostart          # do not start with Windows
+& $s -Python 'C:\Python312\python.exe'
+```
+
+</details>
+
+<details>
+<summary><b>Or without piping a script from the internet</b></summary>
+
+<br>
+
+Reasonable. Read [install.ps1](install.ps1) first, or skip the pipe entirely:
 
 ```powershell
 git clone https://github.com/Maslitsa/VoiceType.git
@@ -110,8 +133,13 @@ cd VoiceType
 powershell -ExecutionPolicy Bypass -File .\install.ps1
 ```
 
-Either way, it creates its own virtual environment, installs everything,
-registers VoiceType to start when you sign in, and launches it.
+**No terminal at all:** download the
+[ZIP](https://github.com/Maslitsa/VoiceType/archive/refs/heads/main.zip), unzip
+it somewhere permanent, and double-click **`INSTALL.bat`**. Windows may warn
+that the file is unsigned — *More info → Run anyway*. `INSTALL.bat` is six
+lines and all it does is run `install.ps1`.
+
+</details>
 
 <details>
 <summary><b>Optional: use OpenAI instead of local transcription</b></summary>

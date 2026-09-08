@@ -4,11 +4,21 @@
     dependencies, and registers it to start when you sign in.
 
 .DESCRIPTION
-    Run this once from the project folder. It is safe to run again -- it
-    reuses an existing environment and just refreshes the shortcuts.
+    Run this once. It is safe to run again -- it reuses an existing
+    environment and just refreshes the shortcuts.
+
+    This script works two ways. Run from a copy of the project, it installs
+    that copy. Piped straight into PowerShell, with no project on disk yet, it
+    first downloads the project and then installs it. That is the one-command
+    install in the README.
 
     The first run downloads PyTorch and the Whisper weights, so expect a few
     hundred megabytes and several minutes.
+
+.PARAMETER InstallDir
+    Where to put the project when bootstrapping. Defaults to
+    %LOCALAPPDATA%\Programs\VoiceType. Ignored when the script is already
+    running from a project folder.
 
 .PARAMETER SetApiKey
     Prompts for an OpenAI API key and stores it outside the project, readable
@@ -28,6 +38,11 @@
     the script cannot find a suitable one by itself.
 
 .EXAMPLE
+    # One command, nothing cloned first:
+    irm https://raw.githubusercontent.com/Maslitsa/VoiceType/main/install.ps1 | iex
+
+.EXAMPLE
+    # From a copy of the project:
     powershell -ExecutionPolicy Bypass -File .\install.ps1
     powershell -ExecutionPolicy Bypass -File .\install.ps1 -SetApiKey
     powershell -ExecutionPolicy Bypass -File .\install.ps1 -Uninstall
@@ -39,12 +54,101 @@ param(
     [switch]$SetApiKey,
     [switch]$NoStart,
     [switch]$NoAutostart,
-    [string]$Python
+    [string]$Python,
+    [string]$InstallDir
 )
 
 $ErrorActionPreference = 'Stop'
 
-$Root       = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$RepoUrl = 'https://github.com/Maslitsa/VoiceType'
+
+# --------------------------------------------------------------------------
+# Bootstrap
+# --------------------------------------------------------------------------
+# `irm <url> | iex` executes this text with no file behind it, so
+# $PSCommandPath is empty and there is no project folder to install from yet.
+# In that case fetch the project first, then hand over to the copy on disk --
+# which is the same script, now running the normal path below.
+if (-not $PSCommandPath) {
+    if (-not $InstallDir) {
+        # Under Programs, not Documents or Desktop: no spaces to quote around,
+        # and never inside a OneDrive-synced folder, which would try to sync
+        # the multi-gigabyte environment created next to it.
+        $InstallDir = Join-Path $env:LOCALAPPDATA 'Programs\VoiceType'
+    }
+
+    Write-Host ''
+    Write-Host '  VoiceType' -ForegroundColor Cyan
+    Write-Host "  installing into $InstallDir"
+    Write-Host ''
+
+    $parent = Split-Path -Parent $InstallDir
+    if (-not (Test-Path $parent)) {
+        New-Item -ItemType Directory -Force -Path $parent | Out-Null
+    }
+
+    $hasGit = [bool](Get-Command git -ErrorAction SilentlyContinue)
+    if (Test-Path (Join-Path $InstallDir '.git')) {
+        Write-Host '==> Updating the existing copy' -ForegroundColor Cyan
+        & git -C $InstallDir pull --ff-only
+        if ($LASTEXITCODE -ne 0) { throw 'git pull failed. Delete the folder and try again.' }
+    } elseif ($hasGit -and -not (Test-Path $InstallDir)) {
+        Write-Host '==> Cloning' -ForegroundColor Cyan
+        & git clone --depth 1 "$RepoUrl.git" $InstallDir
+        if ($LASTEXITCODE -ne 0) { throw 'git clone failed.' }
+    } else {
+        # No git, or a non-git folder is already there. Take the ZIP.
+        Write-Host '==> Downloading' -ForegroundColor Cyan
+        $stamp = [Guid]::NewGuid().ToString('N').Substring(0, 8)
+        $zip = Join-Path $env:TEMP "VoiceType-$stamp.zip"
+        $tmp = Join-Path $env:TEMP "VoiceType-$stamp"
+        try {
+            $ProgressPreference = 'SilentlyContinue'   # the bar makes this slow
+            Invoke-WebRequest -Uri "$RepoUrl/archive/refs/heads/main.zip" `
+                -OutFile $zip -UseBasicParsing
+            Expand-Archive -Path $zip -DestinationPath $tmp -Force
+            $inner = Get-ChildItem $tmp -Directory | Select-Object -First 1
+            if (-not $inner) { throw 'The downloaded archive was empty.' }
+            if (Test-Path $InstallDir) {
+                # Keep config.json and logs across a reinstall.
+                Get-ChildItem $inner.FullName -Force | ForEach-Object {
+                    Copy-Item $_.FullName -Destination $InstallDir -Recurse -Force
+                }
+            } else {
+                Move-Item $inner.FullName $InstallDir
+            }
+        } finally {
+            Remove-Item $zip, $tmp -Recurse -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $installer = Join-Path $InstallDir 'install.ps1'
+    if (-not (Test-Path $installer)) {
+        throw "Download did not produce an install.ps1 in $InstallDir."
+    }
+
+    # Pass along anything that was asked for, minus InstallDir which has now
+    # done its job.
+    $forward = @()
+    foreach ($name in $PSBoundParameters.Keys) {
+        if ($name -eq 'InstallDir') { continue }
+        $value = $PSBoundParameters[$name]
+        if ($value -is [System.Management.Automation.SwitchParameter]) {
+            if ($value.IsPresent) { $forward += "-$name" }
+        } else {
+            $forward += "-$name"
+            $forward += [string]$value
+        }
+    }
+
+    # A child process with an explicit policy, because the caller's execution
+    # policy may well forbid running a .ps1 from disk even though piping one
+    # into the shell was allowed.
+    & powershell -NoProfile -ExecutionPolicy Bypass -File $installer @forward
+    exit $LASTEXITCODE
+}
+
+$Root       = Split-Path -Parent $PSCommandPath
 $VenvDir    = Join-Path $Root '.venv'
 $VenvPy     = Join-Path $VenvDir 'Scripts\python.exe'
 $VenvPyW    = Join-Path $VenvDir 'Scripts\pythonw.exe'
@@ -299,6 +403,7 @@ Write-Host @"
 
   Every transcript is also copied to the clipboard.
 
+  Folder    : $Root
   OpenAI key: $keyState
   Autostart : $autoState
 

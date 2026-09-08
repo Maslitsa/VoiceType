@@ -23,8 +23,11 @@ First public release.
   if the model rewrites too much.
 - Keyboard-hook watchdog, because Windows drops low-level hooks silently after
   sleep and the only symptom is that the hotkey stops working.
-- `INSTALL.bat`, `UNINSTALL.bat` and `CHECKUP.bat`, so nothing requires
-  PowerShell knowledge.
+- One-command install: `irm .../install.ps1 | iex`. The same script installs a
+  local copy when run from one, and downloads the project first when piped in
+  with nothing on disk. Re-running it updates in place and keeps `config.json`.
+- `INSTALL.bat`, `UNINSTALL.bat` and `CHECKUP.bat`, for anyone who would rather
+  not use a terminal at all.
 - `tools/doctor.py`, a single check-up that reports what is wrong and what to
   do about it.
 
