@@ -93,6 +93,29 @@ This is load-bearing, not decoration. On a Russian sentence ending in English,
 Keep every language you use in that list, and keep `en` first. Pinning a
 language in the tray overrides the list for that utterance.
 
+> **This no longer reproduces on clean audio, and you should know that.**
+>
+> The table above was measured on real speech through a real microphone. Rerun
+> today against synthesised speech, `gpt-transcribe` returns both halves
+> correctly with **no list at all**, four times out of four, in both the
+> Russian-to-English and English-to-Russian directions. The same holds for a
+> four-language clip including Kazakh: every list from empty to complete
+> returns all four.
+>
+> Two explanations fit, and they are not exclusive. Synthesised speech is
+> cleaner than a real voice, and a language prior is exactly the kind of help
+> that only matters when the audio is ambiguous. And `gpt-transcribe` is a
+> hosted model that changes underneath us, so a measurement from weeks ago is
+> not evidence about today.
+>
+> The list is still sent, it still costs nothing, and it still cannot hurt. But
+> it is no longer demonstrably load-bearing, and the sentence above claiming it
+> is should be read with that in mind. Check your own voice:
+>
+> ```
+> tools\try_demo.py my_recording.wav --sweep
+> ```
+
 ### Which cloud model
 
 Measured on the same mixed English/Russian clip:

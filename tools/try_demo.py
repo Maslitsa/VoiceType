@@ -17,6 +17,12 @@ Point it at your own recording instead, if you have a wav lying around. Any
 sample rate, mono or stereo, 16-bit:
 
     tools\try_demo.py path\to\your.wav
+
+--sweep runs the same clip under a range of language lists, from none up to
+everything in your config, so you can see for yourself whether the `languages`
+field is earning its keep on your voice:
+
+    tools\try_demo.py my_recording.wav --sweep
 """
 
 import argparse
@@ -109,6 +115,39 @@ def run_local(cfg, pcm):
         engine.shutdown()
 
 
+def sweep(cfg, pcm, runs):
+    """Runs the same clip under several language lists and prints a table.
+
+    The point is to answer, for your own voice, whether the `languages` field
+    is doing anything. It is a hosted model that changes under us, so a
+    measurement from last month is not evidence about today, and synthesised
+    speech is too clean to tell the difference either way.
+    """
+    import copy
+
+    configured = list(cfg["transcription"]["cloud"]["languages"])
+    lists = [("(none)", [])]
+    for size in range(1, len(configured) + 1):
+        lists.append((",".join(configured[:size]), configured[:size]))
+
+    print("\nSweeping {} language lists, {} runs each.".format(
+        len(lists), runs))
+    print("Watch whether the shorter lists lose a language.\n")
+
+    for label, langs in lists:
+        trial = copy.deepcopy(cfg)
+        trial["transcription"]["cloud"]["languages"] = langs
+        backend = CloudBackend(trial)
+        print("languages {}".format(label))
+        for _ in range(runs):
+            try:
+                print("   {}".format(backend.transcribe(pcm, "")))
+            except Exception as exc:
+                print("   failed: {}".format(str(exc)[:90]))
+            time.sleep(0.4)
+        print("")
+
+
 def report(label, result, error):
     if error:
         print("\n{:<7} skipped: {}".format(label, error))
@@ -126,6 +165,10 @@ def main():
     parser.add_argument("--cloud", action="store_true", help="force OpenAI")
     parser.add_argument("--local", action="store_true", help="force local")
     parser.add_argument("--both", action="store_true", help="run both")
+    parser.add_argument("--sweep", action="store_true",
+                        help="try the same clip under several language lists")
+    parser.add_argument("--runs", type=int, default=3,
+                        help="repeats per list when sweeping (default 3)")
     args = parser.parse_args()
 
     path = Path(args.wav) if args.wav else DEMO
@@ -141,6 +184,12 @@ def main():
     if path == DEMO:
         print("spoken    : {}".format(EXPECTED))
     print("-" * 70)
+
+    if args.sweep:
+        if not CloudBackend(cfg).available():
+            raise SystemExit("--sweep needs an API key.")
+        sweep(cfg, pcm, args.runs)
+        return 0
 
     want_cloud = args.cloud or args.both
     want_local = args.local or args.both

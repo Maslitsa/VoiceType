@@ -145,6 +145,35 @@ so you can delete them yourself.
 
 </details>
 
+## Two things to set before you judge it
+
+The defaults in this repo are mine, and mine are unusual. Five minutes here
+decides whether the app works well for you or badly.
+
+Open `config.json` from **tray → Edit settings**.
+
+**1. Your languages.** The shipped default is `["en", "ru", "de", "kk"]`,
+which is what I speak. This is not decoration: it is what the cloud model is
+told to expect, and listing languages you do not speak invites the model to
+hear them. If you only dictate in English and German, say so:
+
+```json
+"languages": ["en", "de"]
+```
+
+**2. `per_segment_language`, if you stay local and switch mid-sentence.** It
+ships off, because it costs punctuation accuracy and about 1.7x in speed, which
+is a bad trade for anyone dictating in one language. If you switch, it is the
+difference between getting half your sentence and all of it:
+
+```json
+"per_segment_language": true
+```
+
+It only helps when you pause at the switch. For a switch with no pause at all,
+the OpenAI backend is still the only thing that works. Exact measurements are
+in [docs/faq.md](docs/faq.md).
+
 ## How you use it
 
 | Gesture | What happens |
@@ -348,6 +377,7 @@ keyboard layouts. That is what makes it better.
 
 | | |
 | --- | --- |
+| [docs/faq.md](docs/faq.md) | Straight answers, including what the local backend cannot do |
 | [docs/configuration.md](docs/configuration.md) | Every setting in `config.json` and which ones matter |
 | [docs/accuracy.md](docs/accuracy.md) | Measurements: model sizes, language switching, latency, microphone level |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Nothing heard, the hotkey going dead, elevated windows |

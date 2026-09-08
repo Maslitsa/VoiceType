@@ -26,11 +26,9 @@ logs/
 # VoiceType installs it from PyPI; this is not part of the project.
 RealtimeSTT-repo/
 
-# Notes and drafts that are not part of the published project.
-REDDIT.md
-WORKLOG.md
-VIDEO.md
-NOTES.md
+# Your own working notes. Drafts, worklogs, anything you do not want published.
+# Everything in here stays on your machine.
+notes/
 scratch/
 
 # ---------------------------------------------------------------------------
