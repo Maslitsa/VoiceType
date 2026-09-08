@@ -1,33 +1,13 @@
 # Contributing
 
-Small changes are easiest to review, and you do not need to write code to help.
+Small changes are easiest to review.
 
-## Helping without writing code
+The single most useful thing you can send is a recording where it gets your
+language wrong, with what you said and what came out. Everything here was
+tuned against English, Russian and German spoken by one person into one quiet
+laptop microphone, so anything outside that is new information.
 
-These are the most useful things anyone can do, and none of them need a
-development setup.
-
-**Tell me how it did with your language.** Everything here was tuned against
-English, Russian and German, spoken by one person into one quiet laptop
-microphone. That is a narrow sample. If your language or your accent behaves
-differently, that is new information. Open a
-[language report](https://github.com/Maslitsa/VoiceType/issues/new?template=language_report.yml)
-with what you said and what came out. Good results are worth reporting too.
-
-**Run the check-up and paste the output.** If something is broken,
-`CHECKUP.bat` prints everything I would otherwise have to ask you for.
-
-**Tell me your microphone is different.** The voice-activity thresholds are
-calibrated against one quiet microphone. `tools/check_mic.py` prints the
-numbers that matter. If the defaults are wrong for your hardware, say so.
-
-**Numbers from a GPU.** Every measurement in
-[docs/accuracy.md](docs/accuracy.md) is CPU-only, which shapes the defaults a
-lot. See [issue #5](https://github.com/Maslitsa/VoiceType/issues/5).
-
-Looking for somewhere to start? The
-[good first issue](https://github.com/Maslitsa/VoiceType/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22)
-label is where I put things that are self-contained.
+Never paste an API key, including inside a log excerpt.
 
 ## Development setup
 
@@ -57,15 +37,19 @@ Logs are in `logs\voicetype.log`.
 ## Before opening a pull request
 
 ```powershell
+.venv\Scripts\python.exe -m unittest discover -s tests
 .venv\Scripts\python.exe -m compileall -q voicetype run.py tools
 ```
 
-That is the whole check. CI runs the same thing on Python 3.11 and 3.12, plus
-a scan for committed API keys.
+The tests are stdlib `unittest` plus numpy and run in about two seconds. They
+cover the parts that do not need hardware: audio maths, segment merging, the
+shape of the cloud request, config merging, hardware resolution and the log
+capping. Anything involving Win32 or a live microphone is not covered, and
+"I ran it and dictated with it for a day" is a reasonable thing to write in a
+pull request.
 
-There is no test suite. Most of this is Win32 behaviour and live audio, which
-is awkward to test in CI. If you add something that can be tested without
-hardware, a test is welcome but not required.
+CI runs the same two commands on Python 3.11 and 3.12, plus a scan for
+committed API keys.
 
 ## Two house rules
 
@@ -78,12 +62,3 @@ measurement.** Otherwise the next person will change it back.
 
 Match the surrounding code otherwise: 4 spaces, about 79 columns, standard
 library imports first.
-
-## Reporting a bug
-
-Include what you did, what happened, the relevant part of
-`logs\voicetype.log`, and your Windows and Python versions. The
-[bug report template](https://github.com/Maslitsa/VoiceType/issues/new?template=bug_report.yml)
-asks for exactly this.
-
-Never paste an API key, including inside a log excerpt.

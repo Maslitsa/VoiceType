@@ -16,7 +16,7 @@ very next thing you say, with no restart and no model reload, and is
 remembered.
 
 German transcribes about as well as English here, umlauts included, in
-0.9–1.5 s. Russian is the weakest of the three, for the reasons below.
+0.9 to 1.5 s. Russian is the weakest of the three, for the reasons below.
 
 Auto-detect on ordinary speech, `base` model:
 
@@ -81,8 +81,8 @@ The request sends `transcription.cloud.languages`, a list, rather than a
 single language, so the model expects all of them instead of committing to
 whichever it hears first.
 
-This is load-bearing, not decoration. On a Russian sentence ending in English,
-`gpt-transcribe`:
+When this was measured, on a Russian sentence ending in English,
+`gpt-transcribe` gave:
 
 | `languages` sent | Result |
 | --- | --- |
@@ -93,24 +93,20 @@ This is load-bearing, not decoration. On a Russian sentence ending in English,
 Keep every language you use in that list, and keep `en` first. Pinning a
 language in the tray overrides the list for that utterance.
 
-> **This no longer reproduces on clean audio, and you should know that.**
+> **This does not reproduce on clean audio.**
 >
-> The table above was measured on real speech through a real microphone. Rerun
-> today against synthesised speech, `gpt-transcribe` returns both halves
-> correctly with **no list at all**, four times out of four, in both the
-> Russian-to-English and English-to-Russian directions. The same holds for a
-> four-language clip including Kazakh: every list from empty to complete
-> returns all four.
+> The table above was measured on real speech through a real microphone.
+> Rerunning it against synthesised speech, `gpt-transcribe` returns both halves
+> correctly with no list at all, four times out of four, in both directions,
+> and returns all four languages of the demo clip under every list from empty
+> to complete.
 >
-> Two explanations fit, and they are not exclusive. Synthesised speech is
-> cleaner than a real voice, and a language prior is exactly the kind of help
-> that only matters when the audio is ambiguous. And `gpt-transcribe` is a
-> hosted model that changes underneath us, so a measurement from weeks ago is
-> not evidence about today.
+> Synthesised speech is cleaner than a real voice, and a language prior only
+> helps when the audio is ambiguous. `gpt-transcribe` is also hosted and
+> changes underneath us. Either would explain it.
 >
-> The list is still sent, it still costs nothing, and it still cannot hurt. But
-> it is no longer demonstrably load-bearing, and the sentence above claiming it
-> is should be read with that in mind. Check your own voice:
+> The list is still sent and still costs nothing. It is no longer demonstrably
+> load-bearing. Check your own voice:
 >
 > ```
 > tools\try_demo.py my_recording.wav --sweep
@@ -188,9 +184,9 @@ multilingual speaker's accent can tip it the wrong way.
 | Model | Time | Notes |
 | --- | --- | --- |
 | `tiny` | ~1 s | noticeably more mistakes |
-| **`base`** (default) | **1.9 – 3.1 s** | correct on ordinary sentences in all three languages |
-| `small` | 5.8 – 6.4 s | better on hard audio, but **dropped a whole clause** on every code-switch clip tested |
-| `large-v3-turbo` | **16.6 – 17.9 s** | unusable here, and also dropped the English half of a switch |
+| **`base`** (default) | **1.9 to 3.1 s** | correct on ordinary sentences in all three languages |
+| `small` | 5.8 to 6.4 s | better on hard audio, but **dropped a whole clause** on every code-switch clip tested |
+| `large-v3-turbo` | **16.6 to 17.9 s** | unusable here, and also dropped the English half of a switch |
 
 Two things to take from this.
 
@@ -245,7 +241,7 @@ Dictating a long paragraph is not slower than dictating a sentence.
 
 ### Things that do not help
 
-- **Greedy decoding.** `beam_size: 1` measured 1.50–1.54 s against 1.61–1.73 s
+- **Greedy decoding.** `beam_size: 1` measured 1.50 to 1.54 s against 1.61 to 1.73 s
   for the default 5, about a tenth of a second, and produced identical text
   on clean clips. Which means the only place it can differ is exactly the hard
   audio where the beam search is earning its keep. Not worth it.
@@ -259,7 +255,7 @@ Dictating a long paragraph is not slower than dictating a sentence.
 
 ### What did change
 
-`transcription.cloud.timeout` is 15 s, not 30. Given a 1–3 s normal range and a
+`transcription.cloud.timeout` is 15 s, not 30. Given a 1 to 3 s normal range and a
 7.7 s worst case, anything past 15 s is stuck rather than slow, and waiting
 half a minute before falling back to a model that answers in under two seconds
 is a bad trade.

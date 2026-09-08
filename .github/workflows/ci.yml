@@ -6,6 +6,11 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Neither job writes anything back. Without this the token inherits whatever
+# the repository default is, which on older repositories is read and write.
+permissions:
+  contents: read
+
 jobs:
   check:
     name: Python ${{ matrix.python }} on Windows

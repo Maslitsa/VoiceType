@@ -2,19 +2,13 @@
 
 # VoiceType
 
-**Dictation software makes you choose a language before you open your mouth.**
+**Dictation software makes you pick a language before you start talking.**
 
-If you only speak one, that is fine. If you speak several and mix them the way
-bilingual people actually do, you spend your day editing yourself down to fit
-the tool.
-
-VoiceType starts from the opposite assumption: that you are going to switch,
-probably mid-sentence, and the software should keep up rather than make you
-slow down.
+VoiceType assumes you are going to switch, probably mid-sentence.
 
 Hold Ctrl+Alt, talk, and the text lands in whatever window you were already
-typing in. No console window on your desktop, nothing in the taskbar, nothing
-in Alt+Tab. Just a microphone in the tray.
+typing in. No console window, nothing in the taskbar, nothing in Alt+Tab. Just
+a microphone in the tray.
 
 Windows. Built on [RealtimeSTT](https://github.com/KoljaB/RealtimeSTT). MIT.
 
@@ -29,26 +23,6 @@ Windows. Built on [RealtimeSTT](https://github.com/KoljaB/RealtimeSTT). MIT.
 </div>
 
 ---
-
-## What it does
-
-VoiceType starts with Windows and stays out of the way. There is no console
-window, no taskbar button and nothing in Alt+Tab.
-
-Hold Ctrl+Alt and a small pill appears above the taskbar with a live waveform
-and the words as they are recognised. Let go and the text is pasted into
-whatever window you were already in, and copied to your clipboard.
-
-Transcription runs locally by default, so nothing leaves your machine. You can
-switch to the OpenAI API from the tray if you want better results on Russian
-and German.
-
-<div align="center">
-<img src="docs/img/overlay-listening.png" width="620" alt="Listening state with a red dot, live waveform and grey preview text"><br>
-<em>Listening. Preview text is grey because it comes from a small fast model and is only a guess.</em><br><br>
-<img src="docs/img/overlay-done.png" width="620" alt="Done state with a green dot and the final transcript in white"><br>
-<em>Done. White text is the final transcript, already pasted and on the clipboard.</em>
-</div>
 
 ## Install
 
@@ -113,7 +87,7 @@ it somewhere permanent and double-click `INSTALL.bat`.
 
 Local transcription is the default. It is free, offline and private. The cloud
 backend is better on Russian and German, and it is the one that handles
-seamless mid-sentence switching.
+mid-sentence switching with no pause.
 
 ```powershell
 .\install.ps1 -SetApiKey
@@ -145,34 +119,21 @@ so you can delete them yourself.
 
 </details>
 
-## Two things to set before you judge it
+## Set your languages
 
-The defaults in this repo are mine, and mine are unusual. Five minutes here
-decides whether the app works well for you or badly.
-
-Open `config.json` from **tray → Edit settings**.
-
-**1. Your languages.** The shipped default is `["en", "ru", "de", "kk"]`,
-which is what I speak. This is not decoration: it is what the cloud model is
-told to expect, and listing languages you do not speak invites the model to
-hear them. If you only dictate in English and German, say so:
+The shipped default is `["en", "ru", "de", "kk"]`, which is what I speak. It is
+what the cloud model is told to expect, so listing languages you do not speak
+invites the model to hear them. Open `config.json` from **tray → Edit
+settings** and change it:
 
 ```json
 "languages": ["en", "de"]
 ```
 
-**2. `per_segment_language`, if you stay local and switch mid-sentence.** It
-ships off, because it costs punctuation accuracy and about 1.7x in speed, which
-is a bad trade for anyone dictating in one language. If you switch, it is the
-difference between getting half your sentence and all of it:
-
-```json
-"per_segment_language": true
-```
-
-It only helps when you pause at the switch. For a switch with no pause at all,
-the OpenAI backend is still the only thing that works. Exact measurements are
-in [docs/faq.md](docs/faq.md).
+If you stay on the local backend and switch language mid-sentence, also set
+`"per_segment_language": true`. It ships off because it costs punctuation
+accuracy and about 1.7x in speed, which is a bad trade for anyone dictating in
+one language. It only helps when you pause at the switch.
 
 ## How you use it
 
@@ -183,11 +144,19 @@ in [docs/faq.md](docs/faq.md).
 | Any other key while recording | Cancels. Nothing is inserted. |
 | Tray icon | Status, pin the language, switch backend, pause the hotkey, edit settings, quit. |
 
+<div align="center">
+<img src="docs/img/overlay-listening.png" width="620" alt="Listening state with a red dot, live waveform and grey preview text"><br>
+<em>Listening. Preview text is grey because it comes from a small fast model and is only a guess.</em><br><br>
+<img src="docs/img/overlay-done.png" width="620" alt="Done state with a green dot and the final transcript in white"><br>
+<em>Done. White text is the final transcript, already pasted and on the clipboard.</em>
+</div>
 
-## The problem it solves
+## Why it exists
 
 Whisper picks one language per utterance. Anything you said in another language
-comes back translated, or it disappears. Also some of other repos have this annoying back window running. Here you cannot see it, it hides in the drop arrow.
+comes back translated, or it disappears. Also some of other repos have this
+annoying back window running. Here you cannot see it, it hides in the drop
+arrow.
 
 Here is Whisper `base` on a sentence that starts in English and ends in
 Russian:
@@ -204,29 +173,16 @@ Bigger models make this worse. On the same clip, `small` and `large-v3-turbo`
 both dropped the entire English half that `base` had kept, because more
 capacity means a stronger single-language prior.
 
-VoiceType handles it two ways, switchable from the tray:
+VoiceType handles it two ways, switchable from the tray: locally, by splitting
+the recording at pauses and detecting the language of each piece; or through
+OpenAI, by sending a list of languages rather than one.
 
-* Locally, by splitting the recording at pauses and detecting the language of
-  each piece separately.
-* Through OpenAI, by sending a `languages` list instead of a single language,
-  so the model expects all of them at once.
+## Try it before you trust it
 
-The same audio through the cloud backend:
+There is an 11 second clip in the repo that changes language three times with
+no pause at the switches, English to German to Russian to Kazakh:
 
-```
-I already sent the invoice yesterday, but клиент до сих пор не ответил
-на моё письмо.
-```
-
-Measurements for all of this are in [docs/accuracy.md](docs/accuracy.md).
-
-### Check it yourself
-
-You do not have to take my word for any of this. There is an 11 second clip in
-the repo that changes language three times with no pause at the switches,
-English to German to Russian to Kazakh:
-
-```
+```powershell
 .venv\Scripts\python.exe tools\try_demo.py --both
 ```
 
@@ -239,65 +195,14 @@ local   1.7s
         I already sent the invoice.
 ```
 
-It also takes a wav of your own, which is a harder test and the one I would
-actually trust:
+It takes a wav of your own too, which is the harder test:
 
-```
+```powershell
 .venv\Scripts\python.exe tools\try_demo.py my_recording.wav --both
 ```
 
-The clip is synthesised speech, which is cleaner than a real voice, so read
-[demo/README.md](demo/README.md) for what that does and does not prove.
-
-## How this compares
-
-The obvious question is whether something else already does this. Mostly they
-solve a different problem.
-
-| | What it is | Does it do this? |
-| --- | --- | --- |
-| [whisperX](https://github.com/m-bain/whisperX) | Batch transcription of audio files, with word-level timestamps and speaker diarization | No hotkey, overlay or paste. It transcribes files. It also needs a language-specific alignment model, which its README lists as a limitation, so it is single-language per file by design |
-| Windows voice typing (Win+H) | Built into Windows, genuinely good | One language at a time, and you dictate into its panel |
-| [Wispr Flow](https://wisprflow.ai) | Polished commercial dictation app | Closed source, subscription, cloud only |
-| [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | The inference library VoiceType uses | A library, not an app |
-| [RealtimeSTT](https://github.com/KoljaB/RealtimeSTT) | The library VoiceType is built on | A library. VoiceType is one thing you can build with it |
-
-I have not benchmarked the other Windows hotkey dictation tools on GitHub, so
-I am not claiming to beat them. If one of them solves the language-switching
-problem properly, I would rather know than keep maintaining this.
-
-### What VoiceType took from whisperX
-
-whisperX's two contributions are VAD preprocessing before transcription, which
-cuts hallucination, and batched inference, which is where its "70x realtime"
-figure comes from.
-
-Both have since been absorbed into faster-whisper. The VAD filter is already
-on in this pipeline, because RealtimeSTT sets `faster_whisper_vad_filter=True`
-by default, and you can see it working in the log:
-
-```
-faster_whisper  VAD filter removed 00:00.176 of audio
-```
-
-Batched inference is available as `BatchedInferencePipeline` and is not used
-yet. Measured here on `base`, CPU:
-
-| audio | sequential | batched | speedup |
-| --- | --- | --- | --- |
-| 21.6s | 4.44s | 4.23s | 1.05x |
-| 65.2s | 11.88s | 8.36s | 1.42x |
-| 130.5s | 27.56s | 14.64s | 1.91x |
-
-So it is worth roughly nothing on a normal dictation and almost 2x on a very
-long one, because Whisper pads to a 30 second window and short clips are one
-pass either way. Adopting it needs a second copy of the model in this process,
-since RealtimeSTT keeps the final model in a worker process, and that is a real
-cost for a case most people will not hit. It is written up as
-[issue #7](https://github.com/Maslitsa/VoiceType/issues/7) with the numbers
-above, if someone wants it.
-
----
+The clip is synthesised speech, which is cleaner than a real voice.
+[demo/README.md](demo/README.md) says what that does and does not prove.
 
 ## Local or OpenAI
 
@@ -311,7 +216,7 @@ same audio played through speakers into the microphone.
 | English | good | better |
 | German | good | better |
 | Russian | the weak one | much better |
-| Mid-sentence switching | only across a pause | yes, seamlessly |
+| Mid-sentence switching | only across a pause | yes, with no pause |
 | Cost | free | about $0.006/min |
 | Privacy | nothing leaves the machine | audio is uploaded when you dictate |
 | Offline | yes | no |
@@ -320,16 +225,7 @@ The cloud is not the faster option. Its median is close to local and its worst
 case is much worse, because it depends on your connection. Switch to it for
 Russian, German and mid-sentence switching, not for speed.
 
-Some examples of the accuracy gap:
-
-| Spoken | Local `base` | OpenAI |
-| --- | --- | --- |
-| Können Sie mir den Bericht bis morgen früh schicken? | "Das Treffen bringt darauf doll das Tag statt" | exact |
-| I already sent the invoice yesterday but клиент до сих пор не ответил... | "I've already sent me an voice yesterday, but today children mind your piece more" | exact, both scripts |
-| Ich habe die Rechnung gestern geschickt aber the client has not replied... | first half garbled | exact, both languages |
-
-`tools/check_cloud.py` runs these with your installed Windows voices and prints
-what comes back, so you can check rather than take my word for it.
+Full numbers in [docs/accuracy.md](docs/accuracy.md).
 
 ## Something wrong?
 
@@ -341,20 +237,9 @@ Double-click `CHECKUP.bat`, or run:
 
 It checks the Python version, the dependencies, your settings, the microphone,
 the API key, whether VoiceType is running and whether it starts with Windows.
-
-```
-[ ok ] Python version             3.12.14
-[ ok ] Dependencies               all present
-[ ok ] Settings                   backend=cloud  language=auto-detect
-[ ok ] Microphone                 7 device(s), using system default
-[ ok ] OpenAI key                 found
-[ ok ] Running                    yes
-[ ok ] Starts with Windows        yes
-```
-
 Anything it cannot fix gets a line telling you what to do.
-[docs/troubleshooting.md](docs/troubleshooting.md) goes deeper, and
-[issues](https://github.com/Maslitsa/VoiceType/issues) are welcome.
+
+[docs/troubleshooting.md](docs/troubleshooting.md) goes deeper.
 
 ## Requirements
 
@@ -365,31 +250,28 @@ Anything it cannot fix gets a line telling you what to do.
 * No GPU needed. A CUDA GPU makes local transcription much faster if you have
   one.
 
-## Support VoiceType
+## Related projects
 
-If VoiceType is useful to you, a GitHub star helps more than it looks.
+[whisperX](https://github.com/m-bain/whisperX) transcribes audio files with
+word-level timestamps and diarization, and its alignment models are
+language-specific. Windows voice typing (Win+H) is good and handles one
+language at a time. [Wispr Flow](https://wisprflow.ai) is a polished commercial
+app, closed source and cloud only. None of them are a hotkey you hold down.
 
-Stars are how people find a project like this, and more users means more bug
-reports from setups I cannot test: other languages, other microphones, other
-keyboard layouts. That is what makes it better.
+I have not benchmarked the other Windows dictation tools on GitHub, so I am not
+claiming to beat them. If one of them handles language switching properly I
+would rather know.
 
 ## Documentation
 
 | | |
 | --- | --- |
-| [docs/faq.md](docs/faq.md) | Straight answers, including what the local backend cannot do |
 | [docs/configuration.md](docs/configuration.md) | Every setting in `config.json` and which ones matter |
 | [docs/accuracy.md](docs/accuracy.md) | Measurements: model sizes, language switching, latency, microphone level |
 | [docs/troubleshooting.md](docs/troubleshooting.md) | Nothing heard, the hotkey going dead, elevated windows |
 | [docs/architecture.md](docs/architecture.md) | How the pieces fit together and the Windows traps behind them |
-| [CONTRIBUTING.md](CONTRIBUTING.md) | How to help, including things that need no code |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | How to help |
 | [CHANGELOG.md](CHANGELOG.md) | What changed |
-
-## Contributing
-
-Small changes are easiest to review. Bug reports from setups I cannot test are
-worth as much as code, and several of the open issues need no programming at
-all. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Credits
 

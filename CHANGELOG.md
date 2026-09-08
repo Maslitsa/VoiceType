@@ -14,16 +14,30 @@ Notable changes to VoiceType. Format follows
   it, so a cuda load that fails falls back to cpu instead of refusing to start.
 - A test suite, `tests/test_voicetype.py`, covering the parts that need no
   microphone: audio maths, segment merging, the cloud request ladder, config
-  merging, hardware resolution and the capped log stream. 22 tests, standard
+  merging, hardware resolution and the capped log stream. 33 tests, standard
   library only, run in CI on 3.11 and 3.12.
 - `tools/doctor.py` reports which device the local model will use.
+- `demo/four_languages.wav`, an 11 second clip that changes language
+  three times with no pause, and `tools/try_demo.py` to run it through
+  either backend. `--sweep` runs any recording under a range of language
+  lists, which is how the `languages` finding below was checked.
 
 ### Changed
 
+- The `languages` list is no longer described as load-bearing.
+  Rerunning that measurement, `gpt-transcribe` returns both halves of a
+  switched sentence with no list at all, in both directions, and all four
+  languages of the demo clip under every list. Either the model improved
+  or synthesised speech is too clean to show the difference. The list is
+  still sent; the claim about it is now marked as unreproduced.
+- Issue templates cut from two to one. The language report asked for
+  labels that do not exist in this repository.
+- CI runs with `permissions: contents: read` instead of inheriting the
+  repository default.
 - One-command install: `irm .../install.ps1 | iex`. The same script installs a
   local copy when run from one, and bootstraps the project first when piped in.
 - `transcription.cloud.timeout` lowered from 30 s to 15 s. Measured normal
-  range is 1.1–2.6 s and the worst seen in real use was 7.7 s, so past 15 s the
+  range is 1.1 to 2.6 s and the worst seen in real use was 7.7 s, so past 15 s the
   request is stuck rather than slow. Waiting half a minute before falling
   back to a local model that answers in under two seconds is a bad trade.
 - Documented where the wait after you stop talking actually goes, including

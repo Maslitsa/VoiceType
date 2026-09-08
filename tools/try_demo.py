@@ -63,8 +63,15 @@ def read_pcm(path, rate):
     if channels > 1:
         audio = audio.reshape(-1, channels)[:, 0]
     if source_rate != rate:
-        from scipy.signal import resample
-        audio = resample(audio, int(len(audio) * rate / source_rate))
+        # Linear interpolation rather than scipy, which is a dev-only
+        # dependency. Most recordings are 44.1 or 48 kHz and this tool is the
+        # first thing a new person runs, so it must not need extra installs.
+        count = int(len(audio) * rate / source_rate)
+        audio = np.interp(
+            np.linspace(0.0, len(audio) - 1, count),
+            np.arange(len(audio)),
+            audio,
+        ).astype(np.float32)
     seconds = len(audio) / float(rate)
     return (np.clip(audio, -1, 1) * 32767).astype("int16").tobytes(), seconds
 
