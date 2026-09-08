@@ -8,6 +8,8 @@ Background dictation for Windows, built on
 [RealtimeSTT](https://github.com/KoljaB/RealtimeSTT).
 It handles sentences that switch language halfway through.
 
+NO ANNOYING BACKGROUND WINDOW. EVERYTHING IS HIDDEN; ONLY A MICROPHONE IS IN A DROP-DOWN ARROW.
+
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?logo=windows&logoColor=white)](#requirements)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](#requirements)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -144,18 +146,11 @@ so you can delete them yourself.
 | Any other key while recording | Cancels. Nothing is inserted. |
 | Tray icon | Status, pin the language, switch backend, pause the hotkey, edit settings, quit. |
 
-Releasing Ctrl+Alt within 0.25s does nothing at all. That delay is what keeps
-ordinary Ctrl+Alt+key shortcuts, and AltGr on layouts that report it as
-Ctrl+Alt, from starting a recording.
-
-If you say nothing, nothing is pasted. Whisper invents plausible sentences out
-of silence, so every recording is checked by a voice activity detector first
-and dropped if it holds no real speech.
 
 ## The problem it solves
 
 Whisper picks one language per utterance. Anything you said in another language
-comes back translated, or it disappears.
+comes back translated, or it disappears. Also some of other repos have this annoying back window running. Here you cannot see it, it hides in the drop arrow.
 
 Here is Whisper `base` on a sentence that starts in English and ends in
 Russian:
