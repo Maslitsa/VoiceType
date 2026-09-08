@@ -230,7 +230,7 @@ signal.
 | | Local (default) | OpenAI |
 | --- | --- | --- |
 | Model | Whisper `base` on your CPU | `gpt-transcribe` |
-| Speed | 1.9 – 3.1 s | 1.2 – 2.0 s |
+| Wait after you stop | 1.5 – 1.9 s, consistent | 1.1 – 2.6 s typical, 7.7 s seen |
 | English | good | better |
 | German | good | better |
 | Russian | the weak one | much better |
@@ -238,6 +238,12 @@ signal.
 | Cost | free | ~$0.006/min |
 | Privacy | nothing leaves the machine | audio is uploaded when you dictate |
 | Offline | yes | no |
+
+**The cloud is not the fast option.** That surprised me. Local Whisper `base`
+answers in about the same time and does it far more predictably — the cloud's
+median is good but its tail is not, and it depends on your connection. Switch
+to the cloud for Russian, German and mid-sentence switching, which is where it
+genuinely wins. Not for speed.
 
 The gap is not subtle:
 

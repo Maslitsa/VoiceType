@@ -184,6 +184,64 @@ bigger local model.
 
 ---
 
+## Latency: where the wait actually goes
+
+RealtimeSTT's headline feature is real-time transcription, and it is worth
+being precise about what that buys, because it is easy to expect the wrong
+thing from it.
+
+**It does not make the final transcript arrive faster.** What it does is
+transcribe continuously *while you are still speaking*, with a small model, so
+words appear as you say them. By the time you stop, you already know roughly
+what it heard — and a two-second wait for the accurate version feels like
+nothing, because you are not staring at an empty box wondering whether it
+worked.
+
+VoiceType uses RealtimeSTT for exactly that, plus the capture pipeline and the
+voice-activity detection that ends a hands-free recording. The live preview in
+the pill is this feature.
+
+### Measured, five runs each
+
+| Audio | local `base` (CPU) | cloud `gpt-transcribe` |
+| --- | --- | --- |
+| 2.9 s clip | 1.47 s (max 1.61) | 1.33 s median (max 2.03) |
+| 8.2 s clip | 1.89 s (max 1.97) | 2.06 s median (max 2.56) |
+
+Two things worth noticing.
+
+**The cloud is not the fast option.** Its median is fine, but it is at the
+mercy of your connection: the worst seen in ordinary use was **7.7 s**, for a
+two-second clip, while the local model has never taken more than about two.
+Choose the cloud for Russian, German and mid-sentence switching. Not for speed.
+
+**Length barely matters.** 8.2 seconds of audio costs only ~0.4 s more than
+2.9 seconds locally, because Whisper pads everything to a 30-second window.
+Dictating a long paragraph is not slower than dictating a sentence.
+
+### Things that do not help
+
+- **Greedy decoding.** `beam_size: 1` measured 1.50–1.54 s against 1.61–1.73 s
+  for the default 5 — about a tenth of a second — and produced identical text
+  on clean clips. Which means the only place it can differ is exactly the hard
+  audio where the beam search is earning its keep. Not worth it.
+- **A smaller final model.** `tiny` is roughly a second faster and noticeably
+  worse. `base` is the right point on that curve.
+- **Transcribing incrementally during the recording.** Tempting, and it is what
+  the realtime preview already does. Doing it for the *final* text would mean
+  transcribing segments without their surrounding context, which
+  [measurably costs accuracy](#switching-language-mid-sentence) — and would
+  save around a second on a path that already takes under two.
+
+### What did change
+
+`transcription.cloud.timeout` is 15 s, not 30. Given a 1–3 s normal range and a
+7.7 s worst case, anything past 15 s is stuck rather than slow, and waiting
+half a minute before falling back to a model that answers in under two seconds
+is a bad trade.
+
+---
+
 ## Microphone level matters more than you would think
 
 Whisper degrades unevenly when the input is quiet, and **Russian suffers

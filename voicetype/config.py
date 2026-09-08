@@ -32,6 +32,11 @@ DEFAULTS = {
         },
         "device": "cpu",
         "compute_type": "int8",
+        # 5 is faster-whisper's default and worth keeping. Greedy decoding
+        # (beam_size 1) was measured here at 1.50-1.54s against 1.61-1.73s,
+        # so it buys about a tenth of a second, and produced identical text on
+        # clean clips -- which means the only place it can differ is the hard
+        # audio where the beam search is actually earning its keep.
         "beam_size": 5,
         "beam_size_realtime": 3,
         # Where faster-whisper caches the model weights. null = default HF cache.
@@ -110,7 +115,13 @@ DEFAULTS = {
             "keywords": [],
             # Free-form description of the recording, to steer style.
             "prompt": "",
-            "timeout": 30,
+            # 15, not 30. Measured on this machine the request takes 1.1-2.6s
+            # for ordinary clips, and the worst seen in real use was 7.7s --
+            # so anything past 15s is stuck, not slow. Waiting the old 30s and
+            # only then falling back to a local model that takes under two
+            # seconds is a bad trade: it makes a network problem cost half a
+            # minute of staring at the pill.
+            "timeout": 15,
             # If the API errors or times out, transcribe locally instead of
             # losing what you just said.
             "fallback_to_local": True,

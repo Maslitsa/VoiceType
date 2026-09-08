@@ -3,6 +3,21 @@
 Notable changes to VoiceType. Format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## Unreleased
+
+### Changed
+
+- One-command install: `irm .../install.ps1 | iex`. The same script installs a
+  local copy when run from one, and bootstraps the project first when piped in.
+- `transcription.cloud.timeout` lowered from 30 s to 15 s. Measured normal
+  range is 1.1–2.6 s and the worst seen in real use was 7.7 s, so past 15 s the
+  request is stuck rather than slow — and waiting half a minute before falling
+  back to a local model that answers in under two seconds is a bad trade.
+- Documented where the wait after you stop talking actually goes, including
+  the finding that the cloud backend is *not* the faster option — its median is
+  comparable to local and its tail is much worse. See
+  [docs/accuracy.md](docs/accuracy.md#latency-where-the-wait-actually-goes).
+
 ## [1.0.0] - 2026-09-08
 
 First public release.
