@@ -90,6 +90,24 @@ def check_config():
     backend = cfg["transcription"]["backend"]
     pinned = cfg["model"]["language"] or "auto-detect"
     say(OK, "Settings", "backend={}  language={}".format(backend, pinned))
+
+    # Worth surfacing: a GPU makes local transcription several times faster,
+    # and "auto" silently landing on cpu is the difference between a bigger
+    # model being usable and being unusable.
+    try:
+        from voicetype.hardware import resolve_hardware
+        device, compute = resolve_hardware(
+            cfg["model"]["device"], cfg["model"]["compute_type"])
+        detail = "{} / {} (model {})".format(
+            device, compute, cfg["model"]["final"])
+        if device == "cpu":
+            say(OK, "Local model runs on", detail,
+                "No CUDA GPU found. That is fine, just slower.")
+        else:
+            say(OK, "Local model runs on", detail)
+    except Exception as exc:
+        say(WARN, "Local model runs on", "could not tell: {}".format(
+            str(exc)[:40]))
     return cfg
 
 

@@ -20,6 +20,8 @@ import time
 
 from RealtimeSTT import AudioToTextRecorder
 
+from .hardware import resolve_hardware
+
 logger = logging.getLogger("voicetype.engine")
 
 # Effectively "never auto-stop", used for push-to-talk.
@@ -77,53 +79,72 @@ class TranscriptionEngine:
         with "Server disconnected" and leave the app loaded but useless. The
         weights do not change under us, so the first retry just forbids the
         network and uses what is on disk.
+
+        The same loop also covers the GPU. Detecting a CUDA device is not the
+        same as being able to use it, because the driver may be too old or
+        cuDNN may be missing, and either shows up only when the model loads.
+        So a machine that resolves to cuda gets cpu as a second candidate
+        rather than an error.
         """
-        attempts = [
+        device, compute_type = resolve_hardware(
+            self._model_cfg["device"], self._model_cfg["compute_type"]
+        )
+        hardware = [(device, compute_type)]
+        if device != "cpu":
+            hardware.append(("cpu", "int8"))
+
+        env_attempts = [
             ("normal", {}),
             ("offline", {"HF_HUB_OFFLINE": "1", "TRANSFORMERS_OFFLINE": "1"}),
         ]
         last_error = None
-        for index, (label, env) in enumerate(attempts):
-            previous = {k: os.environ.get(k) for k in env}
-            os.environ.update(env)
-            try:
-                if self._try_initialise():
-                    return
-            except Exception as exc:
-                last_error = exc
+        for hw_index, (dev, ctype) in enumerate(hardware):
+            for index, (label, env) in enumerate(env_attempts):
+                previous = {k: os.environ.get(k) for k in env}
+                os.environ.update(env)
+                try:
+                    if self._try_initialise(dev, ctype):
+                        return
+                except Exception as exc:
+                    last_error = exc
+                    logger.warning(
+                        "Model load attempt (%s on %s) failed: %s",
+                        label, dev, exc,
+                    )
+                    self._reap_workers()
+                finally:
+                    for key, value in previous.items():
+                        if value is None:
+                            os.environ.pop(key, None)
+                        else:
+                            os.environ[key] = value
+                if index + 1 < len(env_attempts):
+                    time.sleep(1.0)
+            if hw_index + 1 < len(hardware):
                 logger.warning(
-                    "Model load attempt (%s) failed: %s", label, exc
+                    "Falling back from %s to cpu for model loading", dev
                 )
-                self._reap_workers()
-            finally:
-                for key, value in previous.items():
-                    if value is None:
-                        os.environ.pop(key, None)
-                    else:
-                        os.environ[key] = value
-            if index + 1 < len(attempts):
-                time.sleep(1.0)
 
         logger.error("All model load attempts failed")
         self._on_error("Model load failed: {}".format(last_error))
 
-    def _try_initialise(self):
+    def _try_initialise(self, device, compute_type):
         """Builds the recorder. Returns True, or raises for the caller."""
         model = self._model_cfg
         logger.info(
             "Loading models: final=%s realtime=%s on %s/%s",
             model["final"],
             model["realtime"],
-            model["device"],
-            model["compute_type"],
+            device,
+            compute_type,
         )
         started = time.monotonic()
         self._recorder = AudioToTextRecorder(
             model=model["final"],
             realtime_model_type=model["realtime"],
             language=model["language"] or "",
-            device=model["device"],
-            compute_type=model["compute_type"],
+            device=device,
+            compute_type=compute_type,
             download_root=model["download_root"],
             initial_prompt=model["initial_prompt"] or None,
             beam_size=int(model["beam_size"]),

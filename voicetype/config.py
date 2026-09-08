@@ -30,8 +30,16 @@ DEFAULTS = {
             "Russian": "ru",
             "German": "de",
         },
-        "device": "cpu",
-        "compute_type": "int8",
+        # "auto" picks cuda when an NVIDIA card is actually usable and cpu
+        # otherwise. This used to be hardcoded to cpu, which silently wasted a
+        # GPU on the machines that have one, and Whisper on a GPU is several
+        # times faster. Detecting a card is not the same as being able to use
+        # it (old driver, missing cuDNN), so a cuda load that fails falls back
+        # to cpu instead of refusing to start. Force it with "cpu" or "cuda".
+        "device": "auto",
+        # "auto" means float16 on a GPU and int8 on a CPU. int8 is what makes
+        # CPU transcription bearable; float16 is the standard GPU choice.
+        "compute_type": "auto",
         # 5 is faster-whisper's default and worth keeping. Greedy decoding
         # (beam_size 1) was measured here at 1.50-1.54s against 1.61-1.73s,
         # so it buys about a tenth of a second, and produced identical text on

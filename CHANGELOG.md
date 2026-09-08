@@ -5,6 +5,19 @@ Notable changes to VoiceType. Format follows
 
 ## Unreleased
 
+### Added
+
+- GPU detection. `model.device` and `model.compute_type` now default to
+  `"auto"`, which picks cuda/float16 when an NVIDIA card is actually usable and
+  cpu/int8 otherwise. The old hardcoded cpu silently wasted a GPU on the
+  machines that have one. Detecting a card is not the same as being able to use
+  it, so a cuda load that fails falls back to cpu instead of refusing to start.
+- A test suite, `tests/test_voicetype.py`, covering the parts that need no
+  microphone: audio maths, segment merging, the cloud request ladder, config
+  merging, hardware resolution and the capped log stream. 22 tests, standard
+  library only, run in CI on 3.11 and 3.12.
+- `tools/doctor.py` reports which device the local model will use.
+
 ### Changed
 
 - One-command install: `irm .../install.ps1 | iex`. The same script installs a

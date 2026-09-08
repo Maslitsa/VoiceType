@@ -31,9 +31,16 @@ jobs:
         # mistake to make in this codebase, and they only warn.
         run: python -W error::SyntaxWarning -m compileall -q -f voicetype run.py tools
 
+      - name: Install the dependencies the tests need
+        # Not the whole requirements file: PyTorch is gigabytes and the tests
+        # deliberately avoid anything that needs a sound card or a model.
+        run: python -m pip install --quiet numpy httpx webrtcvad-wheels
+
+      - name: Run the tests
+        run: python -m unittest discover -s tests -v
+
       - name: Import the modules that need no audio hardware
         run: |
-          python -c "import sys; sys.path.insert(0, '.'); from voicetype import config; c = config.DEFAULTS; assert c['recording']['vad_aggressiveness'] == 1; print('config OK')"
           python -c "import sys; sys.path.insert(0, '.'); from voicetype import winjob; print('winjob installs:', winjob.join_kill_on_close())"
 
       - name: Check the installer parses

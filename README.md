@@ -183,6 +183,56 @@ I already sent the invoice yesterday, but клиент до сих пор не �
 
 Measurements for all of this are in [docs/accuracy.md](docs/accuracy.md).
 
+## How this compares
+
+The obvious question is whether something else already does this. Mostly they
+solve a different problem.
+
+| | What it is | Does it do this? |
+| --- | --- | --- |
+| [whisperX](https://github.com/m-bain/whisperX) | Batch transcription of audio files, with word-level timestamps and speaker diarization | No hotkey, overlay or paste. It transcribes files. It also needs a language-specific alignment model, which its README lists as a limitation, so it is single-language per file by design |
+| Windows voice typing (Win+H) | Built into Windows, genuinely good | One language at a time, and you dictate into its panel |
+| [Wispr Flow](https://wisprflow.ai) | Polished commercial dictation app | Closed source, subscription, cloud only |
+| [faster-whisper](https://github.com/SYSTRAN/faster-whisper) | The inference library VoiceType uses | A library, not an app |
+| [RealtimeSTT](https://github.com/KoljaB/RealtimeSTT) | The library VoiceType is built on | A library. VoiceType is one thing you can build with it |
+
+I have not benchmarked the other Windows hotkey dictation tools on GitHub, so
+I am not claiming to beat them. If one of them solves the language-switching
+problem properly, I would rather know than keep maintaining this.
+
+### What VoiceType took from whisperX
+
+whisperX's two contributions are VAD preprocessing before transcription, which
+cuts hallucination, and batched inference, which is where its "70x realtime"
+figure comes from.
+
+Both have since been absorbed into faster-whisper. The VAD filter is already
+on in this pipeline, because RealtimeSTT sets `faster_whisper_vad_filter=True`
+by default, and you can see it working in the log:
+
+```
+faster_whisper  VAD filter removed 00:00.176 of audio
+```
+
+Batched inference is available as `BatchedInferencePipeline` and is not used
+yet. Measured here on `base`, CPU:
+
+| audio | sequential | batched | speedup |
+| --- | --- | --- | --- |
+| 21.6s | 4.44s | 4.23s | 1.05x |
+| 65.2s | 11.88s | 8.36s | 1.42x |
+| 130.5s | 27.56s | 14.64s | 1.91x |
+
+So it is worth roughly nothing on a normal dictation and almost 2x on a very
+long one, because Whisper pads to a 30 second window and short clips are one
+pass either way. Adopting it needs a second copy of the model in this process,
+since RealtimeSTT keeps the final model in a worker process, and that is a real
+cost for a case most people will not hit. It is written up as
+[issue #7](https://github.com/Maslitsa/VoiceType/issues/7) with the numbers
+above, if someone wants it.
+
+---
+
 ## Local or OpenAI
 
 Both measured on the same machine, a Ryzen 7 7730U with no GPU, against the
