@@ -43,26 +43,21 @@ Tk thread.
 
 ## Flow
 
-```
-Ctrl+Alt held 0.25s
-   │
-   ├─ overlay.show("listening")
-   ├─ mic.start()  ──▶  chunks ──┬──▶ engine.feed_audio()  ──▶ live preview text
-   │                             └──▶ kept in memory by the app
-   release / tap again / silence
-   │
-   ├─ VAD speech guard on the RAW audio  ──▶  no speech? discard, "Nothing heard"
-   ├─ normalise (transcription copy only)
-   ├─ Router ──▶ LocalBackend (faster-whisper)  or  CloudBackend (OpenAI)
-   ├─ optional cleanup pass
-   └─ clipboard + paste into the focused window
-```
+Holding Ctrl+Alt for 0.25s shows the overlay and opens the microphone. Each
+chunk of audio goes two places at once: to RealtimeSTT, which produces the live
+preview text, and into a buffer the app keeps for itself.
+
+When the recording ends, by release, a second tap, or silence, the app runs a
+voice activity check over the raw buffer. If there is no real speech it stops
+there and shows "Nothing heard". Otherwise it boosts a quiet recording, sends
+it to whichever backend is selected, optionally runs the cleanup pass, then
+copies the text and pastes it into the focused window.
 
 RealtimeSTT is driven with `use_microphone=False`, so it only ever sees audio
 the app feeds it and can never start listening on its own. It supplies capture,
 the voice-activity detection that ends a hands-free recording, and the live
 preview. The **final** transcript is produced separately from the app's own copy
-of the audio — that separation is what makes the local/cloud switch and
+of the audio. That separation is what makes the local/cloud switch and
 per-segment language detection possible without a second copy of the weights.
 
 ---
@@ -80,7 +75,7 @@ ordinary `Ctrl`+`Alt`+`key` shortcut.
 
 ### Windows silently removes low-level hooks
 
-No error, no crash — the app keeps running and looks healthy while the hotkey
+No error, no crash. The app keeps running and looks healthy while the hotkey
 is dead. There is no API to ask whether a hook is alive, so the watchdog infers
 it: Windows tracks when it last saw *any* input (`GetLastInputInfo`), and we
 track when our hook last saw one. If the system has had input we have not,
@@ -99,7 +94,7 @@ the machine, instead of constant churn while you use the mouse.
 ### The overlay must not take focus
 
 `WS_EX_NOACTIVATE | WS_EX_TRANSPARENT | WS_EX_TOOLWINDOW | WS_EX_LAYERED`. It
-never steals focus, is click-through, and stays out of `Alt`+`Tab` — so the
+never steals focus, is click-through, and stays out of `Alt`+`Tab`, so the
 caret stays exactly where you left it and the paste lands in the right window.
 The ex-styles are re-applied after the first map, because the frame window only
 reliably exists once the window has been shown.
@@ -122,7 +117,7 @@ children and they need it too.
 
 This is the one that did real damage. RealtimeSTT transcribes in a spawned
 child process. `TerminateProcess` runs no `atexit` handlers, no `finally`
-blocks and no signal handlers — so when VoiceType was force-killed, the child
+blocks and no signal handlers. So when VoiceType was force-killed, the child
 survived, its parent pipe broke, and RealtimeSTT's poll loop logged a
 `BrokenPipeError` traceback and immediately retried. Forever.
 
@@ -132,8 +127,8 @@ days old, having written an **8.7 GB** `stdout.log` between them.
 No Python can fix this, because no Python runs. So the cleanup belongs to the
 operating system: [`winjob.py`](../voicetype/winjob.py) puts the process in a
 job object marked `JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE`. Children inherit the
-job, and when the last handle to it closes — which Windows does for us when the
-process dies, by any means — everything left in the job is terminated.
+job, and when the last handle to it closes, which Windows does for us when the
+process dies by any means, everything left in the job is terminated.
 
 `logs\stdout.log` is also capped at 2 MB per process, as a backstop.
 
@@ -159,7 +154,7 @@ otherwise.
 
 With the default local backend, no audio and no text ever leaves the machine.
 With the cloud backend, the recorded audio is uploaded to OpenAI when you
-dictate — and only then.
+dictate, and only then.
 
 The API key is stored in `%APPDATA%\VoiceType\openai.key`, outside the project
 folder, with inheritance broken so only your account can read it. It is

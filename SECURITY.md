@@ -6,7 +6,7 @@ Please report security issues privately using GitHub's
 [report a vulnerability](https://github.com/Maslitsa/VoiceType/security/advisories/new)
 form, rather than opening a public issue.
 
-This is maintained in spare time, so no response time is promised — but
+This is maintained in spare time, so no response time is promised, but
 anything sent that way will be read.
 
 ## What VoiceType touches
@@ -35,5 +35,4 @@ Keeping it out of the project is deliberate: a key inside a repository is one
 committed, but the file location is the real protection.
 
 If you think a key has leaked, revoke it at
-<https://platform.openai.com/api-keys>. That is always the right first move —
-rotating a key costs nothing.
+<https://platform.openai.com/api-keys>. That is always the right first move, and rotating a key costs nothing.

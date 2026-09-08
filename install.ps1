@@ -4,7 +4,7 @@
     dependencies, and registers it to start when you sign in.
 
 .DESCRIPTION
-    Run this once. It is safe to run again -- it reuses an existing
+    Run this once. It is safe to run again. It reuses an existing
     environment and just refreshes the shortcuts.
 
     This script works two ways. Run from a copy of the project, it installs
@@ -67,8 +67,8 @@ $RepoUrl = 'https://github.com/Maslitsa/VoiceType'
 # --------------------------------------------------------------------------
 # `irm <url> | iex` executes this text with no file behind it, so
 # $PSCommandPath is empty and there is no project folder to install from yet.
-# In that case fetch the project first, then hand over to the copy on disk --
-# which is the same script, now running the normal path below.
+# In that case fetch the project first, then hand over to the copy on disk,
+# which is the same script now running the normal path below.
 if (-not $PSCommandPath) {
     if (-not $InstallDir) {
         # Under Programs, not Documents or Desktop: no spaces to quote around,

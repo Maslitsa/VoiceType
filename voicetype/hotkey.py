@@ -75,7 +75,7 @@ def _system_idle_seconds():
     """Seconds since Windows last saw any input, or None if unavailable.
 
     This is how the watchdog checks its hook without touching anything. The
-    obvious alternative -- inject a key and see whether the hook observes it --
+    obvious alternative, injecting a key and seeing whether the hook observes it,
     works, but SendInput resets the system idle timer, so probing on a schedule
     would quietly stop the laptop from ever sleeping or blanking its screen.
     """
@@ -173,7 +173,7 @@ class HotkeyListener:
         Windows removes a WH_KEYBOARD_LL hook without warning if its callback
         ever overruns LowLevelHooksTimeout, and resuming from sleep can lose it
         too. Nothing is raised and the process keeps running, so the only
-        symptom is that Ctrl+Alt quietly stops working -- which is exactly what
+        symptom is that Ctrl+Alt quietly stops working, which is exactly what
         happened here after the laptop had been asleep.
 
         There is no API to ask whether a hook is still alive, so we infer it:
@@ -199,8 +199,8 @@ class HotkeyListener:
                 continue          # the whole machine is idle; nothing is wrong
 
             # Windows has seen input we have not. Usually that just means the
-            # mouse moved -- GetLastInputInfo counts mouse events, a keyboard
-            # hook never sees them -- so this is not proof of a dead hook, and
+            # mouse moved. GetLastInputInfo counts mouse events and a keyboard
+            # hook never sees them, so this is not proof of a dead hook, and
             # reinstalling on every mouse twitch would churn the hook all day.
             # Rate limiting keeps it to a refresh whenever you come back to the
             # machine, which is exactly when a hook lost to sleep needs
@@ -266,7 +266,7 @@ class HotkeyListener:
             return
         # The watchdog's own probe must not reach the state machine. It counts
         # as "some other key", which would cancel a latched recording that has
-        # been running quietly while you talk -- the watchdog would end the
+        # been running quietly while you talk. The watchdog would end the
         # very dictation it exists to protect.
         if getattr(event, "scan_code", None) == -VK_NONAME \
                 or name.strip() == "reserved":

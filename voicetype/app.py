@@ -225,7 +225,7 @@ class App:
     # -- engine callbacks --------------------------------------------------
 
     def _on_ready(self):
-        self.tray.set_status("Ready — hold Ctrl+Alt to dictate")
+        self.tray.set_status("Ready · hold Ctrl+Alt to dictate")
         logger.info("Engine ready")
 
     def _on_error(self, message):
@@ -303,7 +303,7 @@ class App:
         self.engine.set_latched(True)
         logger.info("Switched to latched recording")
         self.post(
-            self.overlay.set_status, "Listening — tap Ctrl+Alt to stop"
+            self.overlay.set_status, "Listening · tap Ctrl+Alt to stop"
         )
 
     def _on_hold_release(self):
@@ -352,7 +352,7 @@ class App:
         self._start_max_timer()
         self.tray.set_status("Listening…", busy=True)
         self.post(
-            self.overlay.show, "listening", "Listening — release to insert"
+            self.overlay.show, "listening", "Listening · release to insert"
         )
 
     def _finish_recording(self):
@@ -396,7 +396,7 @@ class App:
         with self._state_lock:
             self.state = IDLE
         self.hotkey.notify_recording_finished()
-        self.tray.set_status("Ready — hold Ctrl+Alt to dictate")
+        self.tray.set_status("Ready · hold Ctrl+Alt to dictate")
 
     # -- transcription pipeline -------------------------------------------
 
@@ -422,7 +422,7 @@ class App:
         """Boosts a quiet recording before it is transcribed.
 
         Only ever called after the speech test has passed, because scaling the
-        audio up scales the noise floor with it -- run the VAD on this and
+        audio up scales the noise floor with it. Run the VAD on this and
         silence reads as continuous speech.
         """
         cfg = self.cfg["recording"]
@@ -536,7 +536,7 @@ class App:
                 self.engine.set_latched(True)
                 self.post(
                     self.overlay.set_status,
-                    "Listening — tap Ctrl+Alt to stop",
+                    "Listening · tap Ctrl+Alt to stop",
                 )
         elif state in (RECORDING_HOLD, RECORDING_LATCHED):
             self._finish_recording()
@@ -557,7 +557,7 @@ class App:
         label = {"": "auto-detect", "en": "English", "ru": "Russian"}.get(
             code, code
         )
-        self.tray.set_status("Ready — language: {}".format(label))
+        self.tray.set_status("Ready · language: {}".format(label))
         self.post(
             self.overlay.flash, "done", "", "Language: {}".format(label), 1.4
         )
@@ -569,7 +569,7 @@ class App:
         if backend == "cloud" and not self.router.cloud.available():
             key_var = self.cfg["transcription"]["cloud"]["api_key_env"]
             logger.warning("Cloud selected but %s is not set", key_var)
-            self.tray.set_status("Cloud selected — no API key")
+            self.tray.set_status("Cloud selected · no API key")
             self.post(
                 self.overlay.flash,
                 "error",
@@ -579,7 +579,7 @@ class App:
             )
             return
         label = "OpenAI" if backend == "cloud" else "this laptop"
-        self.tray.set_status("Ready — transcribing on {}".format(label))
+        self.tray.set_status("Ready · transcribing on {}".format(label))
         self.post(
             self.overlay.flash, "done", "", "Using {}".format(label), 1.4
         )

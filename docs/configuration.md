@@ -2,7 +2,7 @@
 
 Settings live in `config.json` in the project root. It is written on first run
 from the defaults in [`voicetype/config.py`](../voicetype/config.py), which
-carries a comment explaining every value and why it is what it is — that file
+carries a comment explaining every value and why it is what it is. That file
 is the real reference.
 
 Open it from **tray → Edit settings**. Most changes need a restart.
@@ -33,7 +33,7 @@ and untracked is the safest default for a file that can hold a secret.
 | `recording.max_seconds` | `300` | Hard cap, so a stuck key can never record forever. |
 | `recording.min_seconds` | `0.35` | Recordings shorter than this are discarded as accidental taps. |
 | `recording.min_speech_run` | `12` | Consecutive 20 ms frames of detected speech required before a transcript is accepted. 12 = 240 ms. Raise it if noise gets through; lower it if short words are dropped. |
-| `recording.vad_aggressiveness` | `1` | WebRTC VAD strictness, 0 (permissive) to 3 (strict). **This interacts with your microphone level** — see [accuracy](accuracy.md#microphone-level-matters-more-than-you-would-think). |
+| `recording.vad_aggressiveness` | `1` | WebRTC VAD strictness, 0 (permissive) to 3 (strict). **This interacts with your microphone level.** see [accuracy](accuracy.md#microphone-level-matters-more-than-you-would-think). |
 | `recording.normalize_for_transcription` | `true` | Boost quiet recordings before transcribing. Applied to the transcription audio only, never to the speech guard. |
 | `recording.normalize_target_peak` | `0.9` | Boost quiet audio up to this peak. |
 | `recording.normalize_max_gain` | `8.0` | Never amplify by more than this, or near-silence becomes loud noise. |
@@ -48,7 +48,7 @@ and untracked is the safest default for a file that can hold a secret.
 | `model.language_menu` | en/ru/de | What the tray's Language submenu offers. Whisper knows ~99 languages, so `"French": "fr"` is all it takes to add one. |
 | `model.device` | `"cpu"` | Set `"cuda"` if you have an NVIDIA GPU. |
 | `model.compute_type` | `"int8"` | `int8` is the fast CPU default. `float32` is marginally better and much slower. |
-| `model.initial_prompt` | `null` | Whisper's vocabulary hint, for names and jargon. **Empty on purpose** — see the warning below. |
+| `model.initial_prompt` | `null` | Whisper's vocabulary hint, for names and jargon. **Empty on purpose**, see the warning below. |
 
 > [!WARNING]
 > `initial_prompt` biases everything you say toward the prompt's language. A
@@ -77,7 +77,7 @@ and untracked is the safest default for a file that can hold a secret.
 | `transcription.cloud.keywords` | `[]` | Literal terms you expect it to hear: names, jargon, product names. |
 | `transcription.cloud.api_key_file` | `%APPDATA%\VoiceType\openai.key` | Read per request, so a new key takes effect immediately. |
 | `transcription.cloud.api_key_env` | `OPENAI_API_KEY` | Environment variable fallback. |
-| `transcription.cloud.api_key` | `""` | Inline key. **Avoid** — see below. |
+| `transcription.cloud.api_key` | `""` | Inline key. **Avoid**, see below. |
 | `transcription.cloud.timeout` | `30` | Seconds. |
 | `transcription.cloud.fallback_to_local` | `true` | Transcribe locally if the API fails, rather than losing the recording. |
 
@@ -122,7 +122,7 @@ count), `font_family`, `font_size`, and a `colors` map for each state.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `overlay.show_partial_text` | `true` | Show the live preview text while you speak. It comes from `model.realtime`, a much weaker model than the one producing the final text, so it often disagrees — it is drawn greyed out for that reason. Set `false` for waveform only. |
+| `overlay.show_partial_text` | `true` | Show the live preview text while you speak. It comes from `model.realtime`, a much weaker model than the one producing the final text, so it often disagrees. It is drawn greyed out for that reason. Set `false` for waveform only. |
 
 ---
 

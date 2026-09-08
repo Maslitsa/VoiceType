@@ -15,7 +15,7 @@ The recording was captured and then thrown away by the silence guard. Run:
 
 It records you for six seconds and reports the level, whether the speech
 detector fires, and what the transcript comes back as. **Speak during those six
-seconds** — it cannot tell a silent room from a broken microphone otherwise.
+seconds**, because it cannot tell a silent room from a broken microphone.
 
 Read the `quiet vs loud` number first:
 
@@ -31,7 +31,7 @@ Whisper invents plausible sentences out of silence, so every recording is
 checked for real speech first. That check is WebRTC VAD, and **it gets less
 sensitive the quieter the input is**. On a very quiet microphone, genuinely
 spoken Russian once scored a run of 8 against a threshold of 12 and was thrown
-away — while silence scored 4.
+away, while silence scored 4.
 
 `recording.vad_aggressiveness` defaults to `1` for this reason. If you still
 get false rejections, lower `recording.min_speech_run` (12 = 240 ms of
@@ -48,7 +48,7 @@ This is expected, and the preview is now drawn in grey to make that obvious.
 
 They are two different models. The preview comes from `model.realtime` (`tiny`
 by default) running locally so it can keep up with you in real time. The final
-transcript comes from `model.final` — or, on the cloud backend, from OpenAI,
+transcript comes from `model.final`, or on the cloud backend from OpenAI,
 which is a different system entirely. A tiny model asked to guess halfway
 through a sentence will regularly disagree with a good model that has heard all
 of it.
@@ -63,7 +63,7 @@ A real example from this machine, saying a German street name:
 pasted.
 
 To make the preview closer to the final text, raise `model.realtime` from
-`tiny` to `base` — it costs more CPU while you speak. To stop showing it at
+`tiny` to `base`. It costs more CPU while you speak. To stop showing it at
 all and keep just the waveform:
 
 ```json
@@ -84,7 +84,7 @@ The status line after a dictation tells you which backend produced the text:
 | `· local (cloud error)` | The API returned an error |
 
 **`local (offline)` is the one to care about**, because local is markedly
-weaker on Russian and German — a sentence that was perfect yesterday can come
+weaker on Russian and German. A sentence that was perfect yesterday can come
 back mangled purely because the wifi dropped.
 
 A failed connection also costs time. VoiceType bounds the connect phase at 4
@@ -101,13 +101,13 @@ evening.
 ## The hotkey stopped working
 
 Almost certainly a lost keyboard hook. Windows removes a low-level hook
-**silently** — after a sleep, or if a callback ever overruns its timeout — with
+**silently**, after a sleep or if a callback ever overruns its timeout, with
 no error and no crash. The app keeps running and looks perfectly healthy while
 `Ctrl`+`Alt` does nothing.
 
 A watchdog handles this. Every `hotkey.health_check_seconds` (20) it compares
 when Windows last saw *any* input against when our hook last saw one. If the
-system has had input we did not, the hook is refreshed — at most once per
+system has had input we did not, the hook is refreshed, at most once per
 `hotkey.min_reinstall_seconds` (60).
 
 Nothing is injected to test it. An earlier version did inject a key, which
@@ -129,7 +129,7 @@ If it is stuck anyway, quit from the tray and start VoiceType again.
 
 Windows does not deliver key events from an elevated (administrator) window to
 a normal-privilege app. The hotkey will not work while such a window has focus.
-Running VoiceType as administrator fixes it, but is not set up by default —
+Running VoiceType as administrator fixes it, but is not set up by default.
 that is a real privilege increase for a background app that reads your
 keyboard, and it should be your decision.
 
@@ -177,8 +177,8 @@ re-run `install.ps1`.
 ### Leftover pythonw.exe processes
 
 Should be impossible now. RealtimeSTT transcribes in a spawned child process,
-and if VoiceType is killed without running its shutdown path — Task Manager, a
-forced sign-out, a crash — that child used to be orphaned. An orphan spins on a
+and if VoiceType is killed without running its shutdown path (Task Manager, a
+forced sign-out, a crash) that child used to be orphaned. An orphan spins on a
 broken pipe, logging a traceback per iteration, and writes without limit: twelve
 of them were once found on the development machine, the oldest three days old,
 which had between them produced an **8.7 GB** `stdout.log`.
@@ -187,7 +187,7 @@ Two things now prevent it:
 
 - The process joins a Windows **job object** marked kill-on-close
   ([`voicetype/winjob.py`](../voicetype/winjob.py)). Children inherit it, and
-  when we die — however we die — Windows terminates everything left in it. No
+  when we die, however we die, Windows terminates everything left in it. No
   Python runs, so nothing can be skipped.
 - `logs\stdout.log` is capped at 2 MB per process, so even a runaway loop
   cannot fill a disk.
@@ -239,7 +239,7 @@ Key lookup order is `api_key` in the config, then `OPENAI_API_KEY`, then
 
 **An environment variable set after VoiceType started is invisible to it.** The
 app launches from a Startup shortcut and only inherits variables that existed at
-sign-in. The key file is read per request and has no such problem — use
+sign-in. The key file is read per request and has no such problem. Use
 `.\install.ps1 -SetApiKey`.
 
 ### "not supported for this model"

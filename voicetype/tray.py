@@ -207,7 +207,7 @@ class Tray:
         """Updates the tooltip, menu header and icon colour."""
         self._status = status
         try:
-            self._icon.title = "VoiceType — {}".format(status)
+            self._icon.title = "VoiceType · {}".format(status)
             if self._paused:
                 self._icon.icon = self._icons["paused"]
             else:

@@ -37,7 +37,7 @@ class CloudUnreachable(RuntimeError):
     """The request never reached OpenAI: no network, DNS, or TLS failure.
 
     Separate from an API error because it says something about the next
-    request too -- if the network is down now it is probably still down in two
+    request too. If the network is down now it is probably still down in two
     seconds, and stalling on every dictation helps nobody.
     """
 
@@ -46,7 +46,7 @@ OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions"
 # Getting a connection must fail fast. The per-request timeout covers the
 # upload and the model's own work, which legitimately take seconds, but a
 # machine with no network spends all of that time in getaddrinfo before
-# anything can fall back -- measured at 11.6s here on a DNS failure, on top of
+# anything can fall back, measured at 11.6s here on a DNS failure, on top of
 # the local transcription that followed it. Bounding the connect phase turns
 # that into a short pause.
 CONNECT_TIMEOUT = 4.0
@@ -251,7 +251,7 @@ class CloudBackend:
 
         The key file matters more than it looks. VoiceType starts from a
         Startup shortcut, and a process only inherits environment variables
-        that existed when it was created -- so a freshly set OPENAI_API_KEY is
+        that existed when it was created, so a freshly set OPENAI_API_KEY is
         invisible until the next sign-in. The file is read at request time, so
         it works straight away. It also lives outside the project folder, so
         it cannot be committed by accident or picked up by a cloud-sync

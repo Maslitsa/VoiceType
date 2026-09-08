@@ -19,4 +19,4 @@
 
 Several defaults here were chosen by measurement, and the comment above them
 says which. If you are changing one, please include the measurement that
-justifies the new value — otherwise the next person will change it back.
+justifies the new value. Otherwise the next person will change it back.

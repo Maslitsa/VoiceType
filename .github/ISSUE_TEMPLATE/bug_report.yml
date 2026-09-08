@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         Before filing: [docs/troubleshooting.md](https://github.com/Maslitsa/VoiceType/blob/main/docs/troubleshooting.md)
-        covers the common ones — "Nothing heard", the hotkey going dead, and
+        covers the common ones: "Nothing heard", the hotkey going dead, and
         the wrong Python version.
 
         **Never paste an API key**, including inside a log excerpt.

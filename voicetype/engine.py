@@ -173,7 +173,7 @@ class TranscriptionEngine:
         """Terminates any transcription child process still hanging around.
 
         RealtimeSTT runs final transcription in a non-daemon child process. If
-        one outlives us, Python blocks joining it at interpreter exit -- and
+        one outlives us, Python blocks joining it at interpreter exit, and
         with no console that looks like the app simply never quits.
         """
         for child in multiprocessing.active_children():

@@ -1,7 +1,7 @@
 # Accuracy: what was measured
 
-Everything here was measured on one machine — a Ryzen 7 7730U laptop, CPU only,
-no NVIDIA GPU — using the scripts in [`tools/`](../tools). Your numbers will
+Everything here was measured on one machine, a Ryzen 7 7730U laptop with no
+GPU, using the scripts in [`tools/`](../tools). Your numbers will
 differ. The *relationships* between them are the useful part.
 
 ---
@@ -12,7 +12,8 @@ differ. The *relationships* between them are the useful part.
 utterance. English, Russian and German all work without touching anything.
 
 If auto-detect guesses wrong, **tray → Language** pins one. It applies to the
-very next thing you say — no restart, no model reload — and is remembered.
+very next thing you say, with no restart and no model reload, and is
+remembered.
 
 German transcribes about as well as English here, umlauts included, in
 0.9–1.5 s. Russian is the weakest of the three, for the reasons below.
@@ -70,13 +71,13 @@ It also only helps when you actually *pause* at the switch. A seamless switch
 still lands in one language.
 
 `segment_max` (3) and `segment_min_length` (1.2 s) bound the cost. Whisper pads
-every piece to a 30-second window, so each segment is a whole extra pass — one
+every piece to a 30-second window, so each segment is a whole extra pass. One
 minute of speech with natural pauses once produced seventeen of them and took
 22 s instead of 3.
 
 ### Through OpenAI: the `languages` list
 
-The request sends `transcription.cloud.languages` — a *list* — rather than a
+The request sends `transcription.cloud.languages`, a list, rather than a
 single language, so the model expects all of them instead of committing to
 whichever it hears first.
 
@@ -121,7 +122,7 @@ Everything above uses whole sentences. A short phrase with a proper noun in it
 is much harder, because language identification has almost nothing to work
 with.
 
-Saying **"Türkenstraße 3"** — a German street name — came back as
+Saying **"Türkenstraße 3"**, a German street name, came back as
 **"Тюркенштрассе 3."**, transliterated into Cyrillic, from the *cloud* backend
 with `languages: ["en", "ru", "de"]`.
 
@@ -139,7 +140,7 @@ every configuration tested:
 | cloud, pinned `de` | ✅ correct | ✅ correct |
 
 So the failure is not the configuration. It is the combination of a real
-speaker's accent, a quiet microphone, and two or three words of context — at
+speaker's accent, a quiet microphone, and two or three words of context, at
 which point "is this German or Russian?" is genuinely ambiguous, and a
 multilingual speaker's accent can tip it the wrong way.
 
@@ -177,7 +178,7 @@ Two things to take from this.
 `large-v3-turbo` were *worse* than `base` on mixed-language clips: more capacity
 means a stronger single-language prior, so they committed harder and silently
 discarded the other half. On a CPU the cost is Whisper's encoder, and "turbo"
-only slims the decoder — hence 17 s.
+only slims the decoder, hence 17 s.
 
 If you want better multilingual results, the cloud backend is the answer, not a
 bigger local model.
@@ -193,7 +194,7 @@ thing from it.
 **It does not make the final transcript arrive faster.** What it does is
 transcribe continuously *while you are still speaking*, with a small model, so
 words appear as you say them. By the time you stop, you already know roughly
-what it heard — and a two-second wait for the accurate version feels like
+what it heard, and a two-second wait for the accurate version feels like
 nothing, because you are not staring at an empty box wondering whether it
 worked.
 
@@ -222,7 +223,7 @@ Dictating a long paragraph is not slower than dictating a sentence.
 ### Things that do not help
 
 - **Greedy decoding.** `beam_size: 1` measured 1.50–1.54 s against 1.61–1.73 s
-  for the default 5 — about a tenth of a second — and produced identical text
+  for the default 5, about a tenth of a second, and produced identical text
   on clean clips. Which means the only place it can differ is exactly the hard
   audio where the beam search is earning its keep. Not worth it.
 - **A smaller final model.** `tiny` is roughly a second faster and noticeably
@@ -230,7 +231,7 @@ Dictating a long paragraph is not slower than dictating a sentence.
 - **Transcribing incrementally during the recording.** Tempting, and it is what
   the realtime preview already does. Doing it for the *final* text would mean
   transcribing segments without their surrounding context, which
-  [measurably costs accuracy](#switching-language-mid-sentence) — and would
+  [measurably costs accuracy](#switching-language-mid-sentence), and would
   save around a second on a path that already takes under two.
 
 ### What did change
@@ -260,7 +261,7 @@ your input level in **Sound settings → Input** before changing models.
 
 Every recording is checked for real speech before transcription, because
 Whisper invents sentences out of silence. That check is WebRTC VAD, and its
-sensitivity depends on the absolute input level — which is how a genuinely
+sensitivity depends on the absolute input level, which is how a real
 spoken sentence can be thrown away as silence.
 
 Longest unbroken run of speech frames, measured through a very quiet

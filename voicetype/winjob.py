@@ -1,8 +1,8 @@
 """Ties child processes to the lifetime of the app.
 
 RealtimeSTT runs final transcription in a spawned child process. If VoiceType
-dies without running its shutdown path -- Task Manager, a forced sign-out, a
-crash, or an installer that restarts it -- that child is orphaned. Its parent
+dies without running its shutdown path (Task Manager, a forced sign-out, a
+crash, or an installer that restarts it) that child is orphaned. Its parent
 pipe is gone, so RealtimeSTT's poll loop raises BrokenPipeError, logs the
 traceback, and immediately tries again. Forever.
 
@@ -14,7 +14,7 @@ No amount of Python can fix this: TerminateProcess runs no atexit handlers, no
 finally blocks, and no signal handlers. The cleanup has to outlive us, so it
 belongs to the operating system. We put the process in a job object marked
 kill-on-close. Children inherit the job, and when the last handle to it closes
--- which Windows does for us when the process dies, however it dies -- every
+which Windows does for us when the process dies, however it dies, every
 process still in the job is terminated.
 
 Call join_kill_on_close() once, in the parent, before anything is spawned.
@@ -74,8 +74,8 @@ class _JOBOBJECT_EXTENDED_LIMIT_INFORMATION(ctypes.Structure):
 def join_kill_on_close():
     """Puts this process in a job that kills its children when we exit.
 
-    Returns True if the job is in place. A False means the app still works --
-    orphaned workers are a cleanup problem, not a correctness one -- so the
+    Returns True if the job is in place. A False means the app still works.
+    Orphaned workers are a cleanup problem, not a correctness one, so the
     caller logs it and carries on rather than refusing to start.
     """
     global _job

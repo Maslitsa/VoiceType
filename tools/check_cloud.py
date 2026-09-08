@@ -2,7 +2,7 @@ r"""Verifies the OpenAI transcription backend end to end.
 
 Run this once after setting OPENAI_API_KEY. It synthesises speech with the
 Windows voices you already have, sends it to OpenAI, and prints what came
-back with timings and a cost estimate -- including a sentence that switches
+back with timings and a cost estimate, including a sentence that switches
 language mid-way, which is the case the local model cannot do.
 
     .venv\Scripts\python.exe tools\check_cloud.py

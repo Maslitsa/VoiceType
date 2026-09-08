@@ -35,7 +35,7 @@ DEFAULTS = {
         # 5 is faster-whisper's default and worth keeping. Greedy decoding
         # (beam_size 1) was measured here at 1.50-1.54s against 1.61-1.73s,
         # so it buys about a tenth of a second, and produced identical text on
-        # clean clips -- which means the only place it can differ is the hard
+        # clean clips, which means the only place it can differ is the hard
         # audio where the beam search is actually earning its keep.
         "beam_size": 5,
         "beam_size_realtime": 3,
@@ -69,7 +69,7 @@ DEFAULTS = {
         # frischicken", sentence-final punctuation goes missing, and it runs
         # ~1.7x slower. Russian->English and German->English already come out
         # right in a single pass. Turn this on only if you regularly start a
-        # sentence in English and finish it in another language -- and prefer
+        # sentence in English and finish it in another language, and prefer
         # the cloud backend, which handles all of this properly.
         "per_segment_language": False,
         "segment_min_pause": 0.35,
@@ -98,7 +98,7 @@ DEFAULTS = {
             # until you sign in again. The file is read per request.
             #
             # It deliberately lives outside the project folder. A key in
-            # config.json is one 'git add -f' -- or one cloud-sync folder --
+            # config.json is one 'git add -f', or one cloud-sync folder,
             # away from leaking.
             "api_key_env": "OPENAI_API_KEY",
             "api_key": "",
@@ -116,8 +116,8 @@ DEFAULTS = {
             # Free-form description of the recording, to steer style.
             "prompt": "",
             # 15, not 30. Measured on this machine the request takes 1.1-2.6s
-            # for ordinary clips, and the worst seen in real use was 7.7s --
-            # so anything past 15s is stuck, not slow. Waiting the old 30s and
+            # for ordinary clips, and the worst seen in real use was 7.7s,
+            # so anything past 15s is stuck rather than slow. Waiting the old 30s and
             # only then falling back to a local model that takes under two
             # seconds is a bad trade: it makes a network problem cost half a
             # minute of staring at the pill.
@@ -148,8 +148,8 @@ DEFAULTS = {
         # Any other key pressed during the combo cancels the recording.
         "cancel_on_other_key": True,
         # How often to check the keyboard hook is still alive. Windows drops
-        # low-level hooks silently -- after a sleep, or if a callback ever
-        # overruns its timeout -- and the only symptom is that Ctrl+Alt stops
+        # low-level hooks silently, after a sleep or if a callback ever
+        # overruns its timeout, and the only symptom is that Ctrl+Alt stops
         # working while the app carries on looking healthy. When nothing has
         # been typed for this long we inject a key bound to nothing and check
         # our own hook sees it, reinstalling if it does not. 0 disables.
@@ -176,9 +176,9 @@ DEFAULTS = {
         #
         # Measured on this laptop: real speech gives runs of 125-178 frames,
         # while four seconds of room noise peaks at 4. Neither loudness nor a
-        # total frame count separates them -- the idle noise floor already
-        # sits near 0.48 of full scale and scatters ~11% false positives --
-        # but run length does, and it does not depend on how long you spoke.
+        # total frame count separates them. The idle noise floor already
+        # sits near 0.48 of full scale and scatters ~11% false positives.
+        # Run length does, and it does not depend on how long you spoke.
         "min_speech_run": 12,
         # WebRTC VAD aggressiveness, 0 (permissive) to 3 (strict).
         #
@@ -196,7 +196,7 @@ DEFAULTS = {
         # silence still does not.
         "vad_aggressiveness": 1,
         # Boost quiet recordings to this peak before transcribing. Whisper and
-        # the API both degrade on faint audio -- Russian first -- and this mic
+        # the API both degrade on faint audio, Russian first, and this mic
         # peaks around 0.08 where 0.9 is available.
         #
         # Applied to the transcription audio ONLY, never to the speech test
@@ -237,8 +237,8 @@ DEFAULTS = {
         "hide_delay": 1.6,
         # Show the live preview text while you speak. It comes from
         # model.realtime (tiny by default), which is a far weaker model than
-        # whatever produces the final transcript -- with the cloud backend
-        # they are different systems entirely -- so the preview regularly says
+        # whatever produces the final transcript. With the cloud backend
+        # they are different systems entirely, so the preview regularly says
         # something quite different from what you end up with. It is drawn in
         # the muted colour to make clear it is not the answer yet. Set false
         # to show only the waveform.

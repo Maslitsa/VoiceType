@@ -142,7 +142,7 @@ class Overlay:
         self._text = ""
         # Whether _text came from the live preview rather than the finished
         # transcript. The preview is a different, much smaller model, so it
-        # regularly disagrees with the final text -- it is drawn dimmed so it
+        # regularly disagrees with the final text. It is drawn dimmed so it
         # never looks like the answer.
         self._provisional = False
         self._show_partial = bool(config.get("show_partial_text", True))

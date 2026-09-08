@@ -11,10 +11,10 @@ Notable changes to VoiceType. Format follows
   local copy when run from one, and bootstraps the project first when piped in.
 - `transcription.cloud.timeout` lowered from 30 s to 15 s. Measured normal
   range is 1.1–2.6 s and the worst seen in real use was 7.7 s, so past 15 s the
-  request is stuck rather than slow — and waiting half a minute before falling
+  request is stuck rather than slow. Waiting half a minute before falling
   back to a local model that answers in under two seconds is a bad trade.
 - Documented where the wait after you stop talking actually goes, including
-  the finding that the cloud backend is *not* the faster option — its median is
+  the finding that the cloud backend is not the faster option. Its median is
   comparable to local and its tail is much worse. See
   [docs/accuracy.md](docs/accuracy.md#latency-where-the-wait-actually-goes).
 
@@ -56,15 +56,15 @@ First public release.
   terminates children whatever happens to the parent. `logs/stdout.log` is
   also capped at 2 MB per process.
 - **Slow fallback when the network is down.** Only a total timeout was set, and
-  `getaddrinfo` blocks for as long as Windows wants — measured at 11.6 s before
+  `getaddrinfo` blocks for as long as Windows wants, measured at 11.6 s before
   the local fallback even started. The connect phase is now bounded at 4 s, and
   a connection failure suppresses cloud attempts for the next 20 s. Measured
   11.6 s to 4.1 s, then 0.00 s.
 - **Silent downgrade to the local model.** Falling back is right; doing it
   invisibly is not, since local is much weaker on Russian and German. The
   status line now says `local (offline)` and why.
-- **Preview text looked final.** It comes from a much smaller model — a
-  different system entirely on the cloud backend — so it regularly disagrees
+- **Preview text looked final.** It comes from a much smaller model,
+  a different system entirely on the cloud backend, so it regularly disagrees
   with the final text. It is now drawn greyed out, and can be turned off with
   `overlay.show_partial_text`.
 - **Quiet microphones failed the silence guard.** WebRTC VAD gets less

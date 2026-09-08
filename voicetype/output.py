@@ -25,7 +25,7 @@ _kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
 
 # These signatures are not optional. ctypes defaults every undeclared return
 # value to a 32-bit int, which silently truncates the 64-bit handles and
-# pointers these functions return -- GlobalLock then hands back a null
+# pointers these functions return. GlobalLock then hands back a null
 # pointer and memmove faults.
 _user32.OpenClipboard.argtypes = [wintypes.HWND]
 _user32.OpenClipboard.restype = wintypes.BOOL
