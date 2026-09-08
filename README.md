@@ -191,6 +191,35 @@ I already sent the invoice yesterday, but клиент до сих пор не �
 
 Measurements for all of this are in [docs/accuracy.md](docs/accuracy.md).
 
+### Check it yourself
+
+You do not have to take my word for any of this. There is an 11 second clip in
+the repo that changes language three times with no pause at the switches,
+English to German to Russian to Kazakh:
+
+```
+.venv\Scripts\python.exe tools\try_demo.py --both
+```
+
+```
+cloud   3.6s
+        I already sent the invoice. Aber ich warte noch auf eine Antwort.
+        Но клиент до сих пор не ответил. Сондықтан ертең қоңырау шаламын.
+
+local   1.7s
+        I already sent the invoice.
+```
+
+It also takes a wav of your own, which is a harder test and the one I would
+actually trust:
+
+```
+.venv\Scripts\python.exe tools\try_demo.py my_recording.wav --both
+```
+
+The clip is synthesised speech, which is cleaner than a real voice, so read
+[demo/README.md](demo/README.md) for what that does and does not prove.
+
 ## How this compares
 
 The obvious question is whether something else already does this. Mostly they
