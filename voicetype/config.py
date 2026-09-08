@@ -127,6 +127,11 @@ DEFAULTS = {
             "languages": ["en", "ru", "de", "kk"],
             # Literal terms you expect it to hear: names, jargon, product
             # names. e.g. ["Kubernetes", "RealtimeSTT", "Grafana"].
+            #
+            # Whatever you put here is added to a short built-in list of glue
+            # words for the languages above, rather than replacing it, so
+            # adding your own name does not undo the German fix. See
+            # _GLUE_WORDS in transcribe.py for what that list is and why.
             "keywords": [],
             # Free-form hint sent with the audio. Leave it empty and one is
             # generated from the languages above, which is what you want.

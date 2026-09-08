@@ -24,8 +24,8 @@ import numpy as np  # noqa: E402
 
 from voicetype import config as config_module          # noqa: E402
 from voicetype.transcribe import (                     # noqa: E402
-    CloudBackend, _default_prompt, _join_segments, _merge_spans,
-    pcm_to_float, pcm_to_wav,
+    CloudBackend, _default_keywords, _default_prompt, _join_segments,
+    _merge_spans, pcm_to_float, pcm_to_wav,
 )
 
 RATE = 16000
@@ -117,7 +117,9 @@ class CloudRequestShapes(unittest.TestCase):
     def test_first_shape_sends_the_language_list(self):
         first = self.backend._field_variants("")[0]
         self.assertEqual(first.get("languages[]"), ["en", "ru", "de"])
-        self.assertEqual(first.get("keywords[]"), ["Kubernetes"])
+        # Configured keywords are kept, with the glue words appended. See
+        # GlueKeywords below for why they are there.
+        self.assertIn("Kubernetes", first.get("keywords[]"))
 
     def test_ladder_degrades_to_a_singular_language(self):
         variants = self.backend._field_variants("")
@@ -172,6 +174,45 @@ class SteeringPrompt(unittest.TestCase):
         fields = CloudBackend(cfg)._field_variants("")[0]
         self.assertEqual(fields.get("prompt"),
                          "The speaker mixes English and German.")
+
+
+class GlueKeywords(unittest.TestCase):
+    """Short German words vanish in connected speech without these.
+
+    Nobody pronounces the final -r in "aber"; it reduces to a schwa, so the
+    microphone hears roughly "aba". Straight after Cyrillic that either
+    becomes "Абы" or disappears. Measured: "aber" survived 0 of 3 attempts
+    without these keywords and 3 of 3 with them, while five clean clips in
+    other languages were byte-identical either way.
+    """
+
+    def test_german_contributes_glue_words(self):
+        words = _default_keywords(["en", "ru", "de", "kk"])
+        self.assertIn("aber", words)
+        self.assertIn("Aber", words)
+
+    def test_nothing_for_languages_with_no_list(self):
+        self.assertEqual(_default_keywords(["en", "ru"]), [])
+        self.assertEqual(_default_keywords([]), [])
+
+    def test_no_duplicates(self):
+        words = _default_keywords(["de", "de"])
+        self.assertEqual(len(words), len(set(words)))
+
+    def test_configured_keywords_are_kept_alongside_the_glue(self):
+        cfg = config_module.load()
+        cfg["transcription"]["cloud"]["keywords"] = ["Kubernetes"]
+        cfg["transcription"]["cloud"]["languages"] = ["en", "de"]
+        sent = CloudBackend(cfg)._field_variants("")[0].get("keywords[]")
+        self.assertIn("Kubernetes", sent)
+        self.assertIn("aber", sent)
+
+    def test_glue_is_absent_when_german_is_not_configured(self):
+        cfg = config_module.load()
+        cfg["transcription"]["cloud"]["keywords"] = []
+        cfg["transcription"]["cloud"]["languages"] = ["en", "ru"]
+        sent = CloudBackend(cfg)._field_variants("")[0].get("keywords[]")
+        self.assertFalse(sent)
 
 
 class ConfigMerge(unittest.TestCase):

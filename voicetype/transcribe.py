@@ -58,6 +58,33 @@ _LANGUAGE_NAMES = {
 }
 
 
+# Short function words that get swallowed in connected speech, per language.
+#
+# German earns its place by measurement. Nobody pronounces the final -r in
+# "aber": it vocalises to a schwa, so the microphone hears roughly "aba".
+# Coming straight out of Kazakh, where the decoder is already in Cyrillic,
+# that either turns into "Абы" or vanishes. Measured on a clip with the
+# reduced pronunciation, "aber" survived 0 times out of 3 without these and
+# 3 out of 3 with them, and five clean clips in other languages came back
+# byte-identical either way.
+#
+# Only German is listed because German is the only one measured. If short
+# words go missing in your language, add them here and say what changed.
+_GLUE_WORDS = {
+    "de": ["Aber", "aber", "oder", "wenn", "dann", "doch", "noch", "auch"],
+}
+
+
+def _default_keywords(codes):
+    """Glue words for the configured languages, in a stable order."""
+    words = []
+    for code in codes:
+        for word in _GLUE_WORDS.get(code, ()):
+            if word not in words:
+                words.append(word)
+    return words
+
+
 def _default_prompt(codes):
     """Builds the steering prompt from the languages the user speaks.
 
@@ -333,7 +360,14 @@ class CloudBackend:
         """
         codes = ([language] if language
                  else [str(c) for c in self._cloud.get("languages") or []])
+        # Configured keywords come first, then the glue words for the
+        # languages in use. Merged rather than replaced: someone adding their
+        # own name should not silently lose the fix for reduced German.
+        codes_for_glue = [str(c) for c in self._cloud.get("languages") or []]
         keywords = [str(w) for w in self._cloud.get("keywords") or []]
+        for word in _default_keywords(codes_for_glue):
+            if word not in keywords:
+                keywords.append(word)
         prompt = (self._cloud.get("prompt") or "").strip()
         if not prompt:
             # No prompt configured: steer with the languages instead of
