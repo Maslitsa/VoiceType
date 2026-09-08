@@ -2,13 +2,21 @@
 
 # VoiceType
 
-**Hold Ctrl+Alt, talk, and the text appears in whatever window you were typing in.**
+**Dictation software makes you choose a language before you open your mouth.**
 
-Background dictation for Windows, built on
-[RealtimeSTT](https://github.com/KoljaB/RealtimeSTT).
-It handles sentences that switch language halfway through.
+If you only speak one, that is fine. If you speak several and mix them the way
+bilingual people actually do, you spend your day editing yourself down to fit
+the tool.
 
-NO ANNOYING BACKGROUND WINDOW. EVERYTHING IS HIDDEN; ONLY A MICROPHONE IS IN A DROP-DOWN ARROW.
+VoiceType starts from the opposite assumption: that you are going to switch,
+probably mid-sentence, and the software should keep up rather than make you
+slow down.
+
+Hold Ctrl+Alt, talk, and the text lands in whatever window you were already
+typing in. No console window on your desktop, nothing in the taskbar, nothing
+in Alt+Tab. Just a microphone in the tray.
+
+Windows. Built on [RealtimeSTT](https://github.com/KoljaB/RealtimeSTT). MIT.
 
 [![Platform](https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4?logo=windows&logoColor=white)](#requirements)
 [![Python](https://img.shields.io/badge/python-3.11%20%7C%203.12-3776AB?logo=python&logoColor=white)](#requirements)
