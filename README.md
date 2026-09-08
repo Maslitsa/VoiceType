@@ -252,11 +252,15 @@ Anything it cannot fix gets a line telling you what to do.
 
 ## Related projects
 
+[FluidVoice](https://altic.dev/fluid) is the closest thing to this: open
+source, local-first, and it runs Nemotron and Parakeet as well as Whisper. It
+is macOS only for now, with Windows on a waitlist. If you are on a Mac, use it.
+
 [whisperX](https://github.com/m-bain/whisperX) transcribes audio files with
 word-level timestamps and diarization, and its alignment models are
 language-specific. Windows voice typing (Win+H) is good and handles one
 language at a time. [Wispr Flow](https://wisprflow.ai) is a polished commercial
-app, closed source and cloud only. None of them are a hotkey you hold down.
+app, closed source and cloud only.
 
 I have not benchmarked the other Windows dictation tools on GitHub, so I am not
 claiming to beat them. If one of them handles language switching properly I
