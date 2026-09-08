@@ -29,6 +29,7 @@ DEFAULTS = {
             "English": "en",
             "Russian": "ru",
             "German": "de",
+            "Kazakh": "kk",
         },
         # "auto" picks cuda when an NVIDIA card is actually usable and cpu
         # otherwise. This used to be hardcoded to cpu, which silently wasted a
@@ -117,7 +118,13 @@ DEFAULTS = {
             # half with no list and with ["ru", "en"], but transcribed both
             # halves with the full ["en", "ru", "de"]. Keep every language you
             # use in here, and keep "en" first.
-            "languages": ["en", "ru", "de"],
+            #
+            # It copes with more than you might expect. A single 21.8s
+            # utterance that went English -> German -> Russian -> Kazakh came
+            # back correct in all four, across three scripts, in 3.4s. Kazakh
+            # was not even in the list at the time, which suggests the list
+            # steers the model rather than restricting it.
+            "languages": ["en", "ru", "de", "kk"],
             # Literal terms you expect it to hear: names, jargon, product
             # names. e.g. ["Kubernetes", "RealtimeSTT", "Grafana"].
             "keywords": [],
