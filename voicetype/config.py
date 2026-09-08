@@ -128,7 +128,20 @@ DEFAULTS = {
             # Literal terms you expect it to hear: names, jargon, product
             # names. e.g. ["Kubernetes", "RealtimeSTT", "Grafana"].
             "keywords": [],
-            # Free-form description of the recording, to steer style.
+            # Free-form hint sent with the audio. Leave it empty and one is
+            # generated from the languages above, which is what you want.
+            #
+            # This is not cosmetic. A German phrase spoken in a Russian accent
+            # came back as "Эвэрэрджетс пречиечею вдойч", German
+            # transliterated into Cyrillic, on 6 attempts out of 6 with no
+            # prompt. With the generated one it came back in Latin script on
+            # 6 out of 6, and clean English, Russian and German were
+            # unaffected.
+            #
+            # The wording matters more than it should. A longer, more explicit
+            # version ("...switches mid-sentence. Write each language in its
+            # own script.") failed all 6. Short wins. If you set your own,
+            # keep it short and test it.
             "prompt": "",
             # 15, not 30. Measured on this machine the request takes 1.1-2.6s
             # for ordinary clips, and the worst seen in real use was 7.7s,

@@ -24,7 +24,8 @@ import numpy as np  # noqa: E402
 
 from voicetype import config as config_module          # noqa: E402
 from voicetype.transcribe import (                     # noqa: E402
-    CloudBackend, _join_segments, _merge_spans, pcm_to_float, pcm_to_wav,
+    CloudBackend, _default_prompt, _join_segments, _merge_spans,
+    pcm_to_float, pcm_to_wav,
 )
 
 RATE = 16000
@@ -131,6 +132,46 @@ class CloudRequestShapes(unittest.TestCase):
     def test_a_pinned_language_overrides_the_list(self):
         first = self.backend._field_variants("de")[0]
         self.assertEqual(first.get("languages[]"), ["de"])
+
+
+class SteeringPrompt(unittest.TestCase):
+    """Accented speech gets transliterated without this.
+
+    A German phrase read in a Russian accent came back as Cyrillic gibberish
+    on 6 attempts out of 6 with no prompt, and 0 out of 6 with one. The
+    wording is deliberately short: a longer, more explicit version failed all
+    6, so this is not a knob to elaborate on casually.
+    """
+
+    def test_names_every_configured_language(self):
+        prompt = _default_prompt(["en", "ru", "de", "kk"])
+        for name in ("English", "Russian", "German", "Kazakh"):
+            self.assertIn(name, prompt)
+
+    def test_reads_as_a_sentence(self):
+        self.assertEqual(_default_prompt(["en", "ru", "de"]),
+                         "The speaker mixes English, Russian and German.")
+
+    def test_no_prompt_when_there_is_nothing_to_mix(self):
+        self.assertEqual(_default_prompt(["en"]), "")
+        self.assertEqual(_default_prompt([]), "")
+
+    def test_unknown_codes_still_produce_something(self):
+        self.assertIn("zz", _default_prompt(["en", "zz"]))
+
+    def test_a_configured_prompt_wins(self):
+        cfg = config_module.load()
+        cfg["transcription"]["cloud"]["prompt"] = "my own wording"
+        fields = CloudBackend(cfg)._field_variants("")[0]
+        self.assertEqual(fields.get("prompt"), "my own wording")
+
+    def test_generated_prompt_is_used_when_none_is_set(self):
+        cfg = config_module.load()
+        cfg["transcription"]["cloud"]["prompt"] = ""
+        cfg["transcription"]["cloud"]["languages"] = ["en", "de"]
+        fields = CloudBackend(cfg)._field_variants("")[0]
+        self.assertEqual(fields.get("prompt"),
+                         "The speaker mixes English and German.")
 
 
 class ConfigMerge(unittest.TestCase):

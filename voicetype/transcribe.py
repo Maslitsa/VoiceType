@@ -43,6 +43,41 @@ class CloudUnreachable(RuntimeError):
 
 OPENAI_TRANSCRIBE_URL = "https://api.openai.com/v1/audio/transcriptions"
 
+# Enough of Whisper's language codes to name the ones people actually mix.
+# Anything missing falls back to the bare code, which still reads sensibly in
+# the generated prompt.
+_LANGUAGE_NAMES = {
+    "en": "English", "ru": "Russian", "de": "German", "kk": "Kazakh",
+    "fr": "French", "es": "Spanish", "it": "Italian", "pt": "Portuguese",
+    "nl": "Dutch", "pl": "Polish", "uk": "Ukrainian", "tr": "Turkish",
+    "ar": "Arabic", "zh": "Chinese", "ja": "Japanese", "ko": "Korean",
+    "hi": "Hindi", "cs": "Czech", "sv": "Swedish", "da": "Danish",
+    "fi": "Finnish", "no": "Norwegian", "he": "Hebrew", "el": "Greek",
+    "hu": "Hungarian", "ro": "Romanian", "id": "Indonesian", "vi": "Vietnamese",
+    "uz": "Uzbek", "az": "Azerbaijani", "ky": "Kyrgyz", "be": "Belarusian",
+}
+
+
+def _default_prompt(codes):
+    """Builds the steering prompt from the languages the user speaks.
+
+    This is load-bearing for accented speech. A short German phrase read in a
+    Russian accent came back as "Эвэрэрджетс пречиечею вдойч", German
+    transliterated into Cyrillic, on 6 attempts out of 6. With this prompt it
+    came back in Latin script on 6 out of 6.
+
+    The wording matters more than seems reasonable. A longer, more explicit
+    version ("...switches mid-sentence. Write each language in its own
+    script.") failed all 6, so this stays short. Generating it from the
+    configured list rather than hardcoding a sentence means it keeps matching
+    whatever languages someone actually set.
+    """
+    names = [_LANGUAGE_NAMES.get(c, c) for c in codes if c]
+    if len(names) < 2:
+        return ""
+    listed = "{} and {}".format(", ".join(names[:-1]), names[-1])
+    return "The speaker mixes {}.".format(listed)
+
 # Getting a connection must fail fast. The per-request timeout covers the
 # upload and the model's own work, which legitimately take seconds, but a
 # machine with no network spends all of that time in getaddrinfo before
@@ -300,6 +335,12 @@ class CloudBackend:
                  else [str(c) for c in self._cloud.get("languages") or []])
         keywords = [str(w) for w in self._cloud.get("keywords") or []]
         prompt = (self._cloud.get("prompt") or "").strip()
+        if not prompt:
+            # No prompt configured: steer with the languages instead of
+            # sending nothing, which is what breaks accented speech.
+            prompt = _default_prompt(
+                [str(c) for c in self._cloud.get("languages") or []]
+            )
 
         def base():
             fields = {"model": self._cloud["model"]}
